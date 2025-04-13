@@ -5,6 +5,14 @@ import fmpy
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home():
+    return "FMU Backend is up and running!"
+
+@app.route('/simulate_get', methods=['GET'])
+def simulate_get():
+    return "Use POST method with JSON data to simulate the FMU."
+
 @app.route('/simulate', methods=['POST'])
 def simulate():
     data = request.json
