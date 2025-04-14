@@ -5,28 +5,24 @@ import fmpy
 app = Flask(__name__)
 CORS(app)
 
+FMU_FILENAME = 'SecondOrderSystem.fmu'  # Change this if your FMU filename is different
+
 @app.route('/')
 def home():
     return "FMU Backend is up and running!"
 
 @app.route('/simulate_get', methods=['GET'])
 def simulate_get():
-    return "Use POST method with JSON data to simulate the FMU."
-
-from flask import Flask, jsonify
-from flask_cors import CORS
-import fmpy
-
-app = Flask(__name__)
-CORS(app)
+    return "Use POST method on /simulate to run the FMU simulation."
 
 @app.route('/simulate', methods=['POST'])
 def simulate():
     try:
-        result = fmpy.simulate_fmu('SecondOrderSystem.fmu', stop_time=10)
+        result = fmpy.simulate_fmu(FMU_FILENAME, stop_time=10)
 
-        # Return all outputs including time
-        return jsonify({k: result[k].tolist() for k in result.dtype.names})
+        # Convert numpy structured array to JSON-serializable dict
+        output = {key: result[key].tolist() for key in result.dtype.names}
+        return jsonify(output)
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
