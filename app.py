@@ -18,8 +18,8 @@ def simulate():
     try:
         # Extract FMU and disable unit validation
         model_description = read_model_description(FMU_FILE, validate=False)
-        unzipdir = extract(FMU_FILE)
-        result = simulate_fmu(filename=FMU_FILE, stop_time=SIM_TIME)
+        unzipdir = extract(FMU_FILE)  # extract returns folder path
+        result = simulate_fmu(filename=unzipdir, stop_time=SIM_TIME)
         
         last_sim_data = {name: result[name].tolist() for name in result.dtype.names}
         return jsonify({
@@ -28,6 +28,7 @@ def simulate():
         })
     except Exception as e:
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
+
 
 @app.route('/variables', methods=['GET'])
 def variables():
