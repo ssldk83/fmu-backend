@@ -23,7 +23,7 @@ CORS(app)
 @app.route('/simulate', methods=['POST'])
 def simulate():
     try:
-        result = fmpy.simulate_fmu('SecondOrderSystem.fmu', stop_time=10)
+        result = fmpy.simulate_fmu('FirstOrder.fmu', stop_time=10)
 
         # Return all outputs including time
         return jsonify({k: result[k].tolist() for k in result.dtype.names})
