@@ -16,8 +16,12 @@ last_sim_data = {}
 def simulate():
     global last_sim_data
     try:
+        print("Simulating FMU...")
         result = fmpy.simulate_fmu(FMU_FILENAME, stop_time=SIMULATION_STOP_TIME)
+        print("Simulation complete.")
+
         last_sim_data = {key: result[key].tolist() for key in result.dtype.names}
+        print("Variables:", list(last_sim_data.keys()))
 
         return jsonify({
             "message": "Simulation successful.",
@@ -25,6 +29,8 @@ def simulate():
         })
 
     except Exception as e:
+        import traceback
+        print("Simulation error:", traceback.format_exc())
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
 
 
