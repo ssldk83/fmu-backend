@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import fmpy
+from fmpy import simulate_fmu, read_model_description, extract
 import numpy as np
 import traceback
 
@@ -15,7 +16,11 @@ last_sim_data = {}
 def simulate():
     global last_sim_data
     try:
-        result = fmpy.simulate_fmu(FMU_FILE, stop_time=SIM_TIME)
+        # Extract FMU and disable unit validation
+        model_description = read_model_description(FMU_FILE, validate=False)
+        unzipdir = extract(FMU_FILE)
+        result = simulate_fmu(filename=FMU_FILE, stop_time=SIM_TIME)
+        
         last_sim_data = {name: result[name].tolist() for name in result.dtype.names}
         return jsonify({
             "message": "Simulation successful.",
