@@ -7,7 +7,7 @@ import traceback
 app = Flask(__name__)
 CORS(app)
 
-FMU_FILENAME = 'SecondOrderSystem.fmu'  # Ensure this file is in your repo and deployed with the app
+FMU_FILENAME = 'FirstOrder.fmu'  # Ensure this file is in your repo and deployed with the app
 SIMULATION_STOP_TIME = 10
 
 last_sim_data = {}
