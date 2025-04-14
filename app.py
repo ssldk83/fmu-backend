@@ -1,8 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import fmpy
 from fmpy import simulate_fmu, read_model_description, extract
 import numpy as np
+import matplotlib.pyplot as plt
+import io
 import traceback
 
 app = Flask(__name__)
@@ -16,11 +18,10 @@ last_sim_data = {}
 def simulate():
     global last_sim_data
     try:
-        # Extract FMU and disable unit validation
         model_description = read_model_description(FMU_FILE, validate=False)
-        unzipdir = extract(FMU_FILE)  # extract returns folder path
-        result = simulate_fmu(filename=unzipdir, stop_time=SIM_TIME)
-        
+        unzipdir = extract(FMU_FILE)
+        result = simulate_fmu(filename=unzipdir, stop_time=SIM_TIME, validate=False)
+
         last_sim_data = {name: result[name].tolist() for name in result.dtype.names}
         return jsonify({
             "message": "Simulation successful.",
@@ -28,7 +29,6 @@ def simulate():
         })
     except Exception as e:
         return jsonify({"error": str(e), "trace": traceback.format_exc()}), 500
-
 
 @app.route('/variables', methods=['GET'])
 def variables():
@@ -48,6 +48,33 @@ def data():
         "x_label": x,
         "y_label": y
     })
+
+@app.route('/plot', methods=['GET'])
+def plot_png():
+    x = request.args.get('x', 'time')
+    y = request.args.get('y')
+
+    if not last_sim_data:
+        return jsonify({"error": "No simulation data found."}), 400
+
+    if not y:
+        y = next((v for v in last_sim_data if v != 'time'), None)
+
+    if not x or not y or x not in last_sim_data or y not in last_sim_data:
+        return jsonify({"error": f"Invalid variables: {x}, {y}"}), 400
+
+    fig, ax = plt.subplots()
+    ax.plot(last_sim_data[x], last_sim_data[y])
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_title(f"{y} vs. {x}")
+
+    img = io.BytesIO()
+    fig.savefig(img, format='png')
+    img.seek(0)
+    plt.close(fig)
+
+    return send_file(img, mimetype='image/png')
 
 @app.route('/debug', methods=['GET'])
 def debug():
