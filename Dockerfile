@@ -9,31 +9,22 @@ RUN apt-get update && \
     pip3 install --no-cache-dir -r requirements.txt && \
     rm -rf /var/lib/apt/lists/*
 
-# Set up custom Modelica library path
-ENV MODELICAPATH=/app/modelica-libs
-RUN mkdir -p /app/modelica-libs && \
-    echo 'installPackage(Modelica, "4.0.0+maint.om", exactMatch=true); getErrorString();' | omc
-
-# ✅ Sanity check: Did Modelica install correctly?
-RUN ls -l /app/modelica-libs/Modelica  # You should see package.mo, etc.
-
-# Copy Modelica model files
+# Copy your Modelica model files
 COPY FirstOrder.mo SecondOrderSystem.mo ./
 
-# Compile FMUs
+# Compile FMUs (assuming models are fully self-contained)
 RUN mkdir -p /app/output && \
     for model in FirstOrder SecondOrderSystem; do \
       if [ -f "$model.mo" ]; then \
-        echo "loadFile(\"$model.mo\"); loadModel(Modelica); getErrorString();" > compile.mos && \
+        echo "loadFile(\"$model.mo\"); getErrorString();" > compile.mos && \
         echo "translateModelFMU($model, version=\"2.0\"); getErrorString();" >> compile.mos && \
-        omc --modelicaPath=/app/modelica-libs compile.mos && \
+        omc compile.mos && \
         if [ -f "$model.fmu" ]; then mv "$model.fmu" /app/output/; fi; \
       fi; \
     done
 
-
-# Copy the rest of the app (Flask backend, static files, etc.)
+# Copy the rest of the Flask backend
 COPY . .
 
-# Run Flask app
+# Run the Flask app
 CMD ["python3", "app.py"]
