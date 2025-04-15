@@ -18,12 +18,19 @@ def run_fmu(filename):
     
     return result_dict
 
+@app.route('/')
+def hello():
+    return "🚀 Flask backend is alive!"
+    
 @app.route('/simulate/<model_name>', methods=['GET'])
 def simulate_model(model_name):
-    fmu_file = f"{model_name}.fmu"
-    if not os.path.exists(os.path.join(FMU_FOLDER, fmu_file)):
-        return jsonify({"error": "FMU not found"}), 404
-    
+    if model_name == "FirstOrder":
+        fmu_file = "FirstOrder.fmu"
+    elif model_name == "SecondOrderSystem":
+        fmu_file = "SecondOrderSystem.fmu"
+    else:
+        return jsonify({"error": "unknown model"}), 404
+        
     result = run_fmu(fmu_file)
     RESULT_STORAGE['result'] = result  # overwrite for simplicity
     return jsonify({"variables": list(result.keys())})
