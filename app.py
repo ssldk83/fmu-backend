@@ -1,41 +1,39 @@
-FROM openmodelica/openmodelica:v1.25.0-minimal
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import fmpy
+from fmpy import simulate_fmu
+from fmpy.util import read_model_description
+import os
 
-WORKDIR /app
+app = Flask(__name__)
+CORS(app)
 
-# Install Python and dependencies
-COPY requirements.txt .
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip curl && \
-    pip3 install --no-cache-dir -r requirements.txt && \
-    rm -rf /var/lib/apt/lists/*
+FMU_PATH = "output/FirstOrder.fmu"  # Or load dynamically
 
-# Copy Modelica model files
-COPY FirstOrder.mo SecondOrderSystem.mo ./
+@app.route("/simulate/<model_name>")
+def simulate(model_name):
+    fmu_file = f"output/{model_name}.fmu"
+    if not os.path.isfile(fmu_file):
+        return jsonify({"error": "FMU not found"}), 404
 
-# Compile FMUs with logging
-RUN mkdir -p /app/output && \
-    for model in FirstOrder SecondOrderSystem; do \
-      if [ -f "$model.mo" ]; then \
-        echo "loadFile(\"$model.mo\"); getErrorString();" > compile.mos && \
-        echo "translateModelFMU($model, version=\"2.0\"); getErrorString();" >> compile.mos && \
-        omc compile.mos > compile.log 2>&1 && \
-        echo "====== compile.log for $model ======" && cat compile.log && \
-        if [ -f "$model.fmu" ]; then \
-          echo "$model.fmu generated successfully"; \
-          mv "$model.fmu" /app/output/; \
-        else \
-          echo "ERROR: $model.fmu NOT generated"; \
-          cat compile.log; \
-          exit 1; \
-        fi; \
-      else \
-        echo "ERROR: $model.mo not found"; \
-        exit 1; \
-      fi; \
-    done
+    model_description = read_model_description(fmu_file)
+    variables = [v.name for v in model_description.modelVariables]
+    return jsonify({"variables": variables})
 
-# Copy the rest of the Flask backend (app.py, etc.)
-COPY . .
+@app.route("/data")
+def get_data():
+    x = request.args.get("x")
+    y = request.args.get("y")
 
-# Run the Flask app
-CMD ["python3", "app.py"]
+    # Simulate
+    result = simulate_fmu(FMU_PATH, start_time=0.0, stop_time=10.0)
+    if x not in result.dtype.names or y not in result.dtype.names:
+        return jsonify({"error": "Invalid variable names"}), 400
+
+    return jsonify({
+        "x": result[x].tolist(),
+        "y": result[y].tolist()
+    })
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
