@@ -26,4 +26,5 @@ equation
   // Equations for inertia 2
   omega2 = der(phi2);
   J2*der(omega2) = c1*(phi1-phi2)+d1*der(phi1-phi2)-c2*phi2-d2*der(phi2);
+  annotation(experiment(StartTime=0,StopTime=8));
 end SecondOrderSystem;
