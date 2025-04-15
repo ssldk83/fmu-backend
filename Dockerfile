@@ -10,10 +10,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Modelica Standard Library (4.0.0)
-RUN omc +d=interactive <<EOF
-installPackage(Modelica, "4.0.0+maint.om", exactMatch=true);
-getErrorString();
-EOF
+RUN echo 'installPackage(Modelica, "4.0.0+maint.om", exactMatch=true); getErrorString();' | omc
+
 
 # Copy your Modelica model files
 COPY FirstOrder.mo SecondOrderSystem.mo ./
