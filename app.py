@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import fmpy
 from fmpy import simulate_fmu
-from fmpy.util import read_model_description
+from fmpy.model_description import read_model_description
 import os
 
 app = Flask(__name__)
