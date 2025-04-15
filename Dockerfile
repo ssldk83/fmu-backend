@@ -1,5 +1,5 @@
 # Use the official OpenModelica image
-FROM openmodelica/openmodelica:v1.24.5-ompython
+FROM openmodelica/openmodelica:v1.25.0-ompython
 
 # Set working directory
 WORKDIR /app
