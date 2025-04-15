@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FMU Plotter 📈</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h2>FMU Plotter 📉</h2>
+  <label for="x-select">X-axis:</label>
+  <select id="x-select"></select>
+  <label for="y-select">Y-axis:</label>
+  <select id="y-select"></select>
+  <button onclick="plot()">Plot</button>
+  <canvas id="myChart" width="800" height="400"></canvas>
+
+  <script>
+    const API_URL = "https://fmu-backend.onrender.com";
+    const MODEL_NAME = "FirstOrder"; // or "SecondOrderSystem" if you want
+
+    async function fetchVariables() {
+      try {
+        const res = await fetch(`${API_URL}/simulate/${MODEL_NAME}`);
+        if (!res.ok) throw new Error(`Backend error: ${res.status}`);
+        const data = await res.json();
+
+        const xSelect = document.getElementById("x-select");
+        const ySelect = document.getElementById("y-select");
+
+        xSelect.innerHTML = "";
+        ySelect.innerHTML = "";
+
+        data.variables.forEach(v => {
+          const optionX = new Option(v, v);
+          const optionY = new Option(v, v);
+          xSelect.add(optionX);
+          ySelect.add(optionY);
+        });
+      } catch (err) {
+        console.error("Error fetching variables:", err);
+        alert("Could not fetch variables from backend. Check console.");
+      }
+    }
+
+    async function plot() {
+      const x = document.getElementById("x-select").value;
+      const y = document.getElementById("y-select").value;
+
+      try {
+        const res = await fetch(`${API_URL}/data?x=${x}&y=${y}`);
+        const data = await res.json();
+
+        if (data.error) throw new Error(data.error);
+
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.x,
+            datasets: [{
+              label: `${y} vs ${x}`,
+              data: data.y,
+              borderWidth: 2,
+              borderColor: 'blue',
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                title: { display: true, text: x }
+              },
+              y: {
+                title: { display: true, text: y }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Plotting error:", err);
+        alert("Failed to fetch plot data.");
+      }
+    }
+
+    fetchVariables();
+  </script>
+</body>
+</html>
