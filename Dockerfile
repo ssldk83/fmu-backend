@@ -1,4 +1,4 @@
-FROM openmodelica/openmodelica:v1.25.0-minimal
+FROM openmodelica/openmodelica:v1.25.0-ompython
 
 WORKDIR /app
 
