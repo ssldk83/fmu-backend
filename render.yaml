@@ -2,4 +2,6 @@ services:
   - type: web
     name: fmu-backend
     runtime: docker  # This is the critical line
-    buildCommand: ""  # Clear any existing build command
+    dockerfile: Dockerfile  # Explicitly point to your Dockerfile
+    buildCommand: ""  # Clear any build commands
+    startCommand: ""  # Clear any start commands
