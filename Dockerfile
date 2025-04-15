@@ -1,10 +1,8 @@
-# Use the official OpenModelica image
 FROM openmodelica/openmodelica:v1.25.0-ompython
 
-# Set working directory
 WORKDIR /app
 
-# Install Python dependencies first (better layer caching)
+# Install Python dependencies
 COPY requirements.txt .
 RUN apt-get update && \
     apt-get install -y python3-pip && \
@@ -14,23 +12,21 @@ RUN apt-get update && \
 # Copy model files
 COPY *.mo ./
 
-# [Previous Dockerfile content remains the same until the compilation step]
+# Verify OpenModelica version
+RUN omc --version
 
-# Compile models
+# Compile models to FMUs
 RUN for model in FirstOrder SecondOrderSystem; do \
       if [ -f "$model.mo" ]; then \
-        omc --simCodeTarget=fmu "$model.mo" && \
-        mv "$model.fmu" /app/output/; \
+        echo "loadModel(Modelica); getErrorString();" > compile.mos && \
+        echo "translateModelFMU($model, version=\"2.0\"); getErrorString();" >> compile.mos && \
+        omc compile.mos && \
+        mv $model.fmu /app/output/; \
       fi; \
     done && \
     mkdir -p /app/output
 
-# [Rest of Dockerfile remains the same]
-
 # Copy remaining application files
 COPY . .
-
-# Set the output directory as a volume
-VOLUME /app/output
 
 CMD ["python3", "app.py"]
