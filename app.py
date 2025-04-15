@@ -8,11 +8,11 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-FMU_PATH = "output/FirstOrder.fmu"  # Or load dynamically
+FMU_PATH = "FirstOrder.fmu"  # Or load dynamically
 
 @app.route("/simulate/<model_name>")
 def simulate(model_name):
-    fmu_file = f"output/{model_name}.fmu"
+    fmu_file = f"{model_name}.fmu"
     if not os.path.isfile(fmu_file):
         return jsonify({"error": "FMU not found"}), 404
 
