@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request
 from fmpy import simulate_fmu
 import os
-import tempfile
 import json
 from flask_cors import CORS
 
@@ -9,32 +8,44 @@ app = Flask(__name__)
 CORS(app)
 
 FMU_FOLDER = os.path.dirname(os.path.abspath(__file__))
-RESULT_STORAGE = {}  # for simplicity, cache results in memory
+RESULT_STORAGE = {}
 
 def run_fmu(filename):
     fmu_path = os.path.join(FMU_FOLDER, filename)
     
-    # Simulate and store the result
-    result = simulate_fmu(fmu_path)
-    result_dict = {col: result[col].tolist() for col in result.dtype.names}
-    
-    return result_dict
+    try:
+        print(f"📦 Attempting to simulate FMU: {fmu_path}")
+        print(f"📁 Files in folder: {os.listdir(FMU_FOLDER)}")
+
+        result = simulate_fmu(fmu_path)
+        result_dict = {col: result[col].tolist() for col in result.dtype.names}
+        return result_dict
+
+    except Exception as e:
+        print(f"❌ FMU simulation failed: {str(e)}")
+        return {"error": str(e)}
 
 @app.route('/')
 def hello():
     return "🚀 Flask backend is alive!"
-    
+
 @app.route('/simulate/<model_name>', methods=['GET'])
 def simulate_model(model_name):
-    if model_name == "FirstOrder":
-        fmu_file = "FirstOrder.fmu"
-    elif model_name == "SecondOrderSystem":
-        fmu_file = "SecondOrderSystem.fmu"
-    else:
-        return jsonify({"error": "unknown model"}), 404
-        
+    model_map = {
+        "FirstOrder": "FirstOrder.fmu",
+        "SecondOrderSystem": "SecondOrderSystem.fmu"
+    }
+
+    fmu_file = model_map.get(model_name)
+    if not fmu_file:
+        return jsonify({"error": "Unknown model name"}), 404
+
     result = run_fmu(fmu_file)
-    RESULT_STORAGE['result'] = result  # overwrite for simplicity
+
+    if "error" in result:
+        return jsonify({"error": result["error"]}), 500
+
+    RESULT_STORAGE['result'] = result
     return jsonify({"variables": list(result.keys())})
 
 @app.route('/data', methods=['GET'])
@@ -42,9 +53,11 @@ def get_data():
     x = request.args.get('x')
     y = request.args.get('y')
     result = RESULT_STORAGE.get('result')
-    
-    if not result or x not in result or y not in result:
-        return jsonify({"error": "Missing or invalid data"}), 400
+
+    if not result:
+        return jsonify({"error": "No simulation result cached yet"}), 400
+    if x not in result or y not in result:
+        return jsonify({"error": f"Invalid variable(s): {x}, {y}"}), 400
 
     return jsonify({
         "x": result[x],
@@ -56,5 +69,5 @@ def list_models():
     return jsonify(["FirstOrder", "SecondOrderSystem"])
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Render sets PORT automatically
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
