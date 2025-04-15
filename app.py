@@ -1,73 +1,41 @@
-from flask import Flask, jsonify, request
-from fmpy import simulate_fmu
-import os
-import json
-from flask_cors import CORS
+FROM openmodelica/openmodelica:v1.25.0-minimal
 
-app = Flask(__name__)
-CORS(app)
+WORKDIR /app
 
-FMU_FOLDER = os.path.dirname(os.path.abspath(__file__))
-RESULT_STORAGE = {}
+# Install Python and dependencies
+COPY requirements.txt .
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip curl && \
+    pip3 install --no-cache-dir -r requirements.txt && \
+    rm -rf /var/lib/apt/lists/*
 
-def run_fmu(filename):
-    fmu_path = os.path.join(FMU_FOLDER, filename)
-    
-    try:
-        print(f"📦 Attempting to simulate FMU: {fmu_path}")
-        print(f"📁 Files in folder: {os.listdir(FMU_FOLDER)}")
+# Copy Modelica model files
+COPY FirstOrder.mo SecondOrderSystem.mo ./
 
-        result = simulate_fmu(fmu_path)
-        result_dict = {col: result[col].tolist() for col in result.dtype.names}
-        return result_dict
+# Compile FMUs with logging
+RUN mkdir -p /app/output && \
+    for model in FirstOrder SecondOrderSystem; do \
+      if [ -f "$model.mo" ]; then \
+        echo "loadFile(\"$model.mo\"); getErrorString();" > compile.mos && \
+        echo "translateModelFMU($model, version=\"2.0\"); getErrorString();" >> compile.mos && \
+        omc compile.mos > compile.log 2>&1 && \
+        echo "====== compile.log for $model ======" && cat compile.log && \
+        if [ -f "$model.fmu" ]; then \
+          echo "$model.fmu generated successfully"; \
+          mv "$model.fmu" /app/output/; \
+        else \
+          echo "ERROR: $model.fmu NOT generated"; \
+          cat compile.log; \
+          exit 1; \
+        fi; \
+      else \
+        echo "ERROR: $model.mo not found"; \
+        exit 1; \
+      fi; \
+    done
 
-    except Exception as e:
-        print(f"❌ FMU simulation failed: {str(e)}")
-        return {"error": str(e)}
+# Copy the rest of the Flask backend (app.py, etc.)
+COPY . .
 
-@app.route('/')
-def hello():
-    return "🚀 Flask backend is alive!"
-
-@app.route('/simulate/<model_name>', methods=['GET'])
-def simulate_model(model_name):
-    model_map = {
-        "FirstOrder": "FirstOrder.fmu",
-        "SecondOrderSystem": "SecondOrderSystem.fmu"
-    }
-
-    fmu_file = model_map.get(model_name)
-    if not fmu_file:
-        return jsonify({"error": "Unknown model name"}), 404
-
-    result = run_fmu(fmu_file)
-
-    if "error" in result:
-        return jsonify({"error": result["error"]}), 500
-
-    RESULT_STORAGE['result'] = result
-    return jsonify({"variables": list(result.keys())})
-
-@app.route('/data', methods=['GET'])
-def get_data():
-    x = request.args.get('x')
-    y = request.args.get('y')
-    result = RESULT_STORAGE.get('result')
-
-    if not result:
-        return jsonify({"error": "No simulation result cached yet"}), 400
-    if x not in result or y not in result:
-        return jsonify({"error": f"Invalid variable(s): {x}, {y}"}), 400
-
-    return jsonify({
-        "x": result[x],
-        "y": result[y]
-    })
-
-@app.route('/models')
-def list_models():
-    return jsonify(["FirstOrder", "SecondOrderSystem"])
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# Run the Flask app
+CMD ["python3", "app.py"]
