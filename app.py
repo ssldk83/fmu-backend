@@ -10,7 +10,7 @@ import traceback
 app = Flask(__name__)
 CORS(app)
 
-FMU_FILE = 'SecondOrderSystem.fmu'
+FMU_FILE = 'FirstOrder.fmu'
 SIM_TIME = 10
 last_sim_data = {}
 
