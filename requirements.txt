@@ -1,4 +1,2 @@
 fmpy
 flask
-flask-cors
-matplotlib
