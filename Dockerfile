@@ -14,6 +14,9 @@ ENV MODELICAPATH=/app/modelica-libs
 RUN mkdir -p /app/modelica-libs && \
     echo 'installPackage(Modelica, "4.0.0+maint.om", exactMatch=true); getErrorString();' | omc
 
+# ✅ Sanity check: Did Modelica install correctly?
+RUN ls -l /app/modelica-libs/Modelica  # You should see package.mo, etc.
+
 # Copy Modelica model files
 COPY FirstOrder.mo SecondOrderSystem.mo ./
 
@@ -23,10 +26,11 @@ RUN mkdir -p /app/output && \
       if [ -f "$model.mo" ]; then \
         echo "loadFile(\"$model.mo\"); loadModel(Modelica); getErrorString();" > compile.mos && \
         echo "translateModelFMU($model, version=\"2.0\"); getErrorString();" >> compile.mos && \
-        omc compile.mos && \
-        if [ -f \"$model.fmu\" ]; then mv \"$model.fmu\" /app/output/; fi; \
+        omc --modelicaPath=/app/modelica-libs compile.mos && \
+        if [ -f "$model.fmu" ]; then mv "$model.fmu" /app/output/; fi; \
       fi; \
     done
+
 
 # Copy the rest of the app (Flask backend, static files, etc.)
 COPY . .
