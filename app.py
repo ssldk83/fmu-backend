@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request
 from fmpy import simulate_fmu
-from fmpy.util import read_model_description
 import os
 import tempfile
 import json
