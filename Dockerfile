@@ -12,8 +12,15 @@ RUN apt-get update && \
 # Copy Modelica model files
 COPY FirstOrder.mo SecondOrderSystem.mo ./
 
-# Compile FMUs from .mo files using Python
-RUN python3 compile_fmu.py
+# Compile FMUs directly into /app so app.py can find them
+RUN for model in FirstOrder SecondOrderSystem; do \
+      if [ -f "$model.mo" ]; then \
+        echo "loadFile(\"$model.mo\"); getErrorString();" > compile.mos && \
+        echo "translateModelFMU($model, version=\"2.0\"); getErrorString();" >> compile.mos && \
+        omc compile.mos && \
+        if [ -f "$model.fmu" ]; then mv "$model.fmu" /app/; fi; \
+      fi; \
+    done
 
 # Copy the rest of your Flask app
 COPY . .
