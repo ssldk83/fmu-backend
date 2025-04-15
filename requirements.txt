@@ -1,2 +1,3 @@
 fmpy
 flask
+flask-cors
