@@ -14,14 +14,18 @@ RUN apt-get update && \
 # Copy model files
 COPY *.mo ./
 
-# Compile models (combined into one RUN for better layer caching)
+# [Previous Dockerfile content remains the same until the compilation step]
+
+# Compile models
 RUN for model in FirstOrder SecondOrderSystem; do \
       if [ -f "$model.mo" ]; then \
-        omc +target=linux64 +simCodeTarget=fmu "$model.mo" && \
+        omc --simCodeTarget=fmu "$model.mo" && \
         mv "$model.fmu" /app/output/; \
       fi; \
     done && \
     mkdir -p /app/output
+
+# [Rest of Dockerfile remains the same]
 
 # Copy remaining application files
 COPY . .
