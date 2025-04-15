@@ -1,17 +1,32 @@
-# Install OpenModelica
+# Use the official OpenModelica image
 FROM openmodelica/openmodelica:v1.24.5-ompython
 
-# Copy your model files
-COPY YourModel.mo /app/
+# Set working directory
 WORKDIR /app
 
-# Compile the model
-RUN omc +target=linux64 +simCodeTarget=fmu YourModel.mo
-
-# Set up your Python environment
-RUN apt-get install -y python3-pip
+# Install Python dependencies first (better layer caching)
 COPY requirements.txt .
-RUN pip install -r requirements.txt
+RUN apt-get update && \
+    apt-get install -y python3-pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    rm -rf /var/lib/apt/lists/*
 
+# Copy model files
+COPY *.mo ./
+
+# Compile models (combined into one RUN for better layer caching)
+RUN for model in FirstOrder SecondOrderSystem; do \
+      if [ -f "$model.mo" ]; then \
+        omc +target=linux64 +simCodeTarget=fmu "$model.mo" && \
+        mv "$model.fmu" /app/output/; \
+      fi; \
+    done && \
+    mkdir -p /app/output
+
+# Copy remaining application files
 COPY . .
+
+# Set the output directory as a volume
+VOLUME /app/output
+
 CMD ["python3", "app.py"]
