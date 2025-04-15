@@ -49,6 +49,10 @@ def get_data():
         "y": result[y]
     })
 
+@app.route('/models')
+def list_models():
+    return jsonify(["FirstOrder", "SecondOrderSystem"])
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))  # Render sets PORT automatically
     app.run(host="0.0.0.0", port=port)
