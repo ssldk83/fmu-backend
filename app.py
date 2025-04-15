@@ -3,8 +3,10 @@ from fmpy import simulate_fmu
 import os
 import tempfile
 import json
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 FMU_FOLDER = os.path.dirname(os.path.abspath(__file__))
 RESULT_STORAGE = {}  # for simplicity, cache results in memory
