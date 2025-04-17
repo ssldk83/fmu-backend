@@ -2,28 +2,22 @@ FROM openmodelica/openmodelica:v1.25.0-ompython
 
 WORKDIR /app
 
-# Install Python and pip dependencies
+# ---- install python deps -------------------------------------------------
 COPY requirements.txt .
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip curl && \
-    pip3 install --no-cache-dir -r requirements.txt && \
-    rm -rf /var/lib/apt/lists/*
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copy Modelica model files
+# ---- copy Modelica sources & pre‑compile FMUs ---------------------------
 COPY FirstOrder.mo SecondOrderSystem.mo ./
 
-# Compile FMUs directly into /app so app.py can find them
-RUN for model in FirstOrder SecondOrderSystem; do \
-      if [ -f "$model.mo" ]; then \
-        echo "loadFile(\"$model.mo\"); getErrorString();" > compile.mos && \
-        echo "translateModelFMU($model, version=\"2.0\"); getErrorString();" >> compile.mos && \
-        omc compile.mos && \
-        if [ -f "$model.fmu" ]; then mv "$model.fmu" /app/; fi; \
-      fi; \
+# compile FMUs; they end up in /app/*.fmu
+RUN for m in FirstOrder SecondOrderSystem ; do \
+      test -f "$m.mo" && \
+      echo "loadFile(\"$m.mo\"); translateModelFMU($m, version=\"2.0\", fmuType=\"me\");" \
+      > build.mos && omc build.mos ; \
     done
 
-# Copy the rest of your Flask app
+# ---- copy the rest of the Flask project ---------------------------------
 COPY . .
 
-# Run the Flask server
+EXPOSE 5000
 CMD ["python3", "app.py"]
