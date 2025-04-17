@@ -1,89 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8"/>
   <title>FMU Plotter 📈</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 1rem 2rem; }
+    select, button { margin: 0 .5rem .5rem 0; }
+  </style>
 </head>
 <body>
   <h2>FMU Plotter 📉</h2>
-  <label for="x-select">X-axis:</label>
+
+  <label for="model-select">Model:</label>
+  <select id="model-select">
+      <option>FirstOrder</option>
+      <option>SecondOrderSystem</option>
+  </select>
+
+  <label for="x-select">X‑axis:</label>
   <select id="x-select"></select>
-  <label for="y-select">Y-axis:</label>
+
+  <label for="y-select">Y‑axis:</label>
   <select id="y-select"></select>
-  <button onclick="plot()">Plot</button>
-  <canvas id="myChart" width="800" height="400"></canvas>
+
+  <button id="plot-btn">Plot</button>
+
+  <canvas id="myChart" width="900" height="420"></canvas>
 
   <script>
-    const API_URL = "https://fmu-backend.onrender.com";
-    const MODEL_NAME = "FirstOrder"; // or "SecondOrderSystem" if you want
+    // ---------- configuration ----------
+    const DEFAULT_API = "https://fmu-backend.onrender.com";
+    const API_URL = new URL(window.location.search).searchParams.get('api') || DEFAULT_API;
 
-    async function fetchVariables() {
+    // ---------- state ----------
+    let chart;          // Chart.js instance (for destroy)
+    const modelSel = document.getElementById('model-select');
+    const xSel     = document.getElementById('x-select');
+    const ySel     = document.getElementById('y-select');
+    const btn      = document.getElementById('plot-btn');
+
+    // ---------- helper ----------
+    async function loadVariables(model) {
       try {
-        const res = await fetch(`${API_URL}/simulate/${MODEL_NAME}`);
-        if (!res.ok) throw new Error(`Backend error: ${res.status}`);
-        const data = await res.json();
+        const r = await fetch(`${API_URL}/simulate/${model}`);
+        if (!r.ok) throw new Error(r.statusText);
+        const { variables } = await r.json();
 
-        const xSelect = document.getElementById("x-select");
-        const ySelect = document.getElementById("y-select");
-
-        xSelect.innerHTML = "";
-        ySelect.innerHTML = "";
-
-        data.variables.forEach(v => {
-          const optionX = new Option(v, v);
-          const optionY = new Option(v, v);
-          xSelect.add(optionX);
-          ySelect.add(optionY);
-        });
-      } catch (err) {
-        console.error("Error fetching variables:", err);
-        alert("Could not fetch variables from backend. Check console.");
+        xSel.innerHTML = ySel.innerHTML = '';
+        for (const v of variables) {
+          xSel.add(new Option(v, v));
+          ySel.add(new Option(v, v));
+        }
+      } catch (e) {
+        alert('Failed to fetch variable list'); console.error(e);
       }
     }
 
     async function plot() {
-      const x = document.getElementById("x-select").value;
-      const y = document.getElementById("y-select").value;
+      const model = modelSel.value;
+      const x = xSel.value, y = ySel.value;
+      if (!x || !y) return alert('Pick both X and Y');
 
       try {
-        const res = await fetch(`${API_URL}/data?x=${x}&y=${y}`);
-        const data = await res.json();
-
+        const r = await fetch(`${API_URL}/data?model=${model}&x=${x}&y=${y}`);
+        const data = await r.json();
         if (data.error) throw new Error(data.error);
 
-        const ctx = document.getElementById('myChart').getContext('2d');
-        new Chart(ctx, {
+        // destroy previous chart
+        if (chart) { chart.destroy(); }
+
+        chart = new Chart(document.getElementById('myChart').getContext('2d'), {
           type: 'line',
-          data: {
-            labels: data.x,
-            datasets: [{
-              label: `${y} vs ${x}`,
-              data: data.y,
-              borderWidth: 2,
-              borderColor: 'blue',
-              fill: false,
-              tension: 0.1
-            }]
-          },
+          data: { labels: data.x, datasets: [{
+            label: `${model}:  ${y} vs ${x}`,
+            data: data.y,
+            borderWidth: 2,
+            borderColor: '#1f78b4',
+            pointRadius: 0,
+            fill: false,
+            tension: 0.15
+          }]},
           options: {
             responsive: true,
             scales: {
-              x: {
-                title: { display: true, text: x }
-              },
-              y: {
-                title: { display: true, text: y }
-              }
+              x: { title: { display:true, text: x } },
+              y: { title: { display:true, text: y }, beginAtZero:false }
             }
           }
         });
-      } catch (err) {
-        console.error("Plotting error:", err);
-        alert("Failed to fetch plot data.");
+      } catch (e) {
+        alert('Plot failed – see console'); console.error(e);
       }
     }
 
-    fetchVariables();
+    // ---------- wire up ----------
+    modelSel.addEventListener('change', ()=> loadVariables(modelSel.value));
+    btn.addEventListener('click', plot);
+
+    // initial load
+    loadVariables(modelSel.value);
   </script>
 </body>
 </html>
