@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>FMU Plotter 📈</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body{font-family:sans-serif;padding:1rem 2rem}
+  select,button{margin:0 .5rem .5rem 0}
+</style>
+</head>
+<body>
+<h2>FMU Plotter 📉</h2>
+
+<label>Model:
+  <select id="model">
+    <option>FirstOrder</option>
+    <option>SecondOrderSystem</option>
+  </select>
+</label>
+
+<label>X‑axis:<select id="x"></select></label>
+<label>Y‑axis:<select id="y"></select></label>
+<button id="plot">Plot</button>
+
+<canvas id="chart" width="900" height="420"></canvas>
+
+<script>
+  /* ---------- configuration ---------- */
+  const DEFAULT_API = "https://fmu-backend.onrender.com";
+  const API_URL     = new URLSearchParams(location.search).get('api') || DEFAULT_API;
+
+  /* ---------- elements ---------- */
+  const selModel = document.getElementById('model');
+  const selX     = document.getElementById('x');
+  const selY     = document.getElementById('y');
+  const btnPlot  = document.getElementById('plot');
+  let   chart;
+
+  /* ---------- helper: load variable list ---------- */
+  async function loadVariables(model){
+    try{
+      const r = await fetch(`${API_URL}/simulate/${encodeURIComponent(model)}`);
+      if(!r.ok) throw new Error(await r.text());
+      const {variables} = await r.json();
+
+      selX.innerHTML = selY.innerHTML = '';
+      variables.forEach(v=>{
+        selX.add(new Option(v,v));
+        selY.add(new Option(v,v));
+      });
+    }catch(e){
+      console.error(e);
+      alert('Failed to load variables');
+    }
+  }
+
+  /* ---------- helper: plot ---------- */
+  async function plot(){
+    const model = selModel.value, x = selX.value, y = selY.value;
+    if(!x||!y) return alert('Select X and Y');
+
+    const url = `${API_URL}/data?` +
+                `model=${encodeURIComponent(model)}` +
+                `&x=${encodeURIComponent(x)}` +
+                `&y=${encodeURIComponent(y)}`;
+    try{
+      const r = await fetch(url);
+      const data = await r.json();
+      if(!r.ok){ throw new Error(data.error || r.statusText); }
+
+      if(chart) chart.destroy();
+      chart = new Chart(document.getElementById('chart').getContext('2d'),{
+        type:'line',
+        data:{labels:data.x,datasets:[{
+          label:`${model}: ${y} vs ${x}`,
+          data:data.y,borderWidth:2,borderColor:'#1f78b4',
+          pointRadius:0,fill:false,tension:0.15
+        }]},
+        options:{responsive:true,
+          scales:{x:{title:{display:true,text:x}},
+                  y:{title:{display:true,text:y}}}}
+      });
+    }catch(e){
+      console.error(e);
+      alert('Plot failed: '+e.message);
+    }
+  }
+
+  /* ---------- event wiring ---------- */
+  selModel.addEventListener('change',()=>loadVariables(selModel.value));
+  btnPlot .addEventListener('click',plot);
+
+  /* ---------- initial ---------- */
+  loadVariables(selModel.value);
+</script>
+</body>
+</html>
