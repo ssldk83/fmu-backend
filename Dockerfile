@@ -1,13 +1,18 @@
-# Use the same image so fmpy has a full GNU tool‑chain
 FROM openmodelica/openmodelica:v1.25.0-ompython
 
 WORKDIR /app
 
-# ---------- Python dependencies ----------
+# ---- system packages needed for FMU source build ----
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential cmake && \
+    rm -rf /var/lib/apt/lists/*
+
+# ---- python deps ----
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# ---------- copy the Flask project (FMUs included) ----------
+# ---- copy the Flask project (FMUs included) ----
 COPY . .
 
 EXPOSE 5000
