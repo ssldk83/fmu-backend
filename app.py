@@ -60,23 +60,29 @@ def dump_fmu():
 # -------------------------------------------------------------------- #
 # 2) simulate_fmu(fmu) + 3) plot_result(result)  ->  /plot
 # -------------------------------------------------------------------- #
+import plotly.graph_objs as go
+import plotly.io as pio
+
 @app.route("/plot")
 def plot():
-    # -- simulate the FMU ------------------------------------------------
-    result = simulate_fmu(FMU_FILE)
+    try:
+        result = simulate_fmu(FMU_FILE)
+        time = result['time']
+        a = result['a']
+    except Exception as e:
+        return f"<pre>Simulation failed: {e}</pre>"
 
-    # -- create a matplotlib Figure with FMPy's helper -------------------
-    import plotly.io as pio
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=time, y=a, mode='lines', name='a'))
+    fig.update_layout(
+        title="FMU Simulation Result",
+        xaxis_title="time [s]",
+        yaxis_title="a",
+        margin=dict(l=40, r=40, t=40, b=40)
+    )
 
-    fig = plot_result(result)
-    plot_html = pio.to_html(fig, full_html=True)
-    return plot_html
-    
-    # -- stream the plot to the browser as PNG ---------------------------
-    png_io = io.BytesIO()
-    fig.savefig(png_io, format="png", bbox_inches="tight", dpi=150)
-    png_io.seek(0)
-    return send_file(png_io, mimetype="image/png")
+    return pio.to_html(fig, full_html=True)
+
 
 
 # optional helper route so users land somewhere nice
