@@ -1,6 +1,4 @@
 flask
-flask-cors
 fmpy
-numpy
-lxml
-appdirs
+matplotlib
+plotly
