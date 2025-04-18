@@ -91,6 +91,11 @@ def index():
     """
     return render_template_string(html)
 
+@app.route("/variables")
+def show_vars():
+    result = simulate_fmu(FMU_FILE)
+    return "<pre>" + "\n".join(result.dtype.names) + "</pre>"
+
 
 # -------------------------------------------------------------------- #
 # Run the Flask server (Render/Heroku friendly)
