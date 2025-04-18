@@ -26,33 +26,35 @@ app = Flask(__name__)
 def dump_fmu():
     md = read_model_description(FMU_FILE)
 
-    info = f"""
-Model Info
------------
-FMI Version       {md.fmiVersion}
-Model Name        {md.modelName}
-Description       {md.description or ''}
-Platforms         {", ".join(md.coSimulation.modelIdentifier)}
-Continuous States {md.numberOfContinuousStates}
-Event Indicators  {md.numberOfEventIndicators}
-Generation Tool   {md.generationTool}
-Generation Date   {md.generationDateAndTime}
+    # ---------- header info ----------
+    lines = [
+        "Model Info",
+        "-----------",
+        f"FMI Version       {md.fmiVersion}",
+        f"Model Name        {md.modelName}",
+        f"Description       {md.description or ''}",
+        f"Continuous States {md.numberOfContinuousStates}",
+        f"Event Indicators  {md.numberOfEventIndicators}",
+        "",
+        "Default Experiment",
+        "------------------",
+        f"Stop Time         {getattr(md.defaultExperiment, 'stopTime', '')}",
+        f"Step Size         {getattr(md.defaultExperiment, 'stepSize', '')}",
+        "",
+        "Variables (first 20 outputs)",
+        "Name                 Causality   Start Value    Unit   Description",
+        "-------------------- ---------- -------------- ------ ---------------------------",
+    ]
 
-Default Experiment
-------------------
-Stop Time         {md.defaultExperiment.stopTime}
-Step Size         {md.defaultExperiment.stepSize}
-"""
-
-    # list a few variables marked as outputs
-    outputs = [
-        v for v in md.modelVariables if v.causality == "output"
-    ][:10]  # first ten for brevity
-
+    # ---------- list first 20 output variables ----------
+    outputs = [v for v in md.modelVariables if v.causality == "output"][:20]
     for v in outputs:
-        info += f"\n{v.name:20}  output  {v.start:>12}  {v.unit or ''}  {v.description or ''}"
+        start_val = "" if v.start is None else v.start
+        unit      = "" if v.unit  is None else v.unit
+        desc      = "" if v.description is None else v.description
+        lines.append(f"{v.name:20}  output   {str(start_val):>12}  {unit:6} {desc}")
 
-    return f"<pre>{info}</pre>"
+    return "<pre>" + "\n".join(lines) + "</pre>"
 
 
 # -------------------------------------------------------------------- #
