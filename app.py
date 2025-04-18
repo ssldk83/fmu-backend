@@ -19,3 +19,8 @@ def simulate():
 @app.route('/plot')
 def view_plot():
     return render_template('result_plot.html')  # ✅ reads from templates/
+
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
