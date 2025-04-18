@@ -60,29 +60,6 @@ def dump_fmu():
 # -------------------------------------------------------------------- #
 # 2) simulate_fmu(fmu) + 3) plot_result(result)  ->  /plot
 # -------------------------------------------------------------------- #
-import plotly.graph_objs as go
-import plotly.io as pio
-
-@app.route("/plot")
-def plot():
-    try:
-        result = simulate_fmu(FMU_FILE)
-        time = result['time']
-        a = result['a']
-    except Exception as e:
-        return f"<pre>Simulation failed: {e}</pre>"
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=time, y=a, mode='lines', name='a'))
-    fig.update_layout(
-        title="FMU Simulation Result",
-        xaxis_title="time [s]",
-        yaxis_title="a",
-        margin=dict(l=40, r=40, t=40, b=40)
-    )
-
-    return pio.to_html(fig, full_html=True)
-
 @app.route('/chart')
 def chart():
     result = simulate_fmu(FMU_FILE)
@@ -146,7 +123,6 @@ def index():
     <h2>FMPy + Flask demo (Rectifier.fmu)</h2>
     <ul>
       <li><a href="/dump">/dump</a> &nbsp;→ show model information (like <code>dump(fmu)</code>)</li>
-      <li><a href="/plot">/plot</a> &nbsp;→ run simulation &amp; display plot</li>
       <li><a href="/chart">/chart</a> &nbsp;→ run simulation &amp; display plot</li>
       <li><a href="/variables">/variables</a> &nbsp;→ run simulation &amp; display plot</li>
     </ul>
