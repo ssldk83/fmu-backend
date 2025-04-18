@@ -11,18 +11,11 @@ def index():
 
 @app.route('/simulate')
 def simulate():
-    fmu_path = 'Rectifier.fmu'  # FMU file in the main folder
-    result = simulate_fmu(fmu_path)
-    
+    result = simulate_fmu('Rectifier.fmu')
     fig = plot_result(result)
-    plot_path = os.path.join('static', 'result_plot.html')
-    fig.write_html(plot_path)
-
+    fig.write_html('templates/result_plot.html')  # ✅ save where Flask can read it
     return redirect(url_for('view_plot'))
 
 @app.route('/plot')
 def view_plot():
-    return render_template('/result_plot.html')
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    return render_template('result_plot.html')  # ✅ reads from templates/
