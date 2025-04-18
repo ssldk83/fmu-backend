@@ -66,8 +66,12 @@ def plot():
     result = simulate_fmu(FMU_FILE)
 
     # -- create a matplotlib Figure with FMPy's helper -------------------
-    fig = plot_result(result)
+    import plotly.io as pio
 
+    fig = plot_result(result)
+    plot_html = pio.to_html(fig, full_html=True)
+    return plot_html
+    
     # -- stream the plot to the browser as PNG ---------------------------
     png_io = io.BytesIO()
     fig.savefig(png_io, format="png", bbox_inches="tight", dpi=150)
