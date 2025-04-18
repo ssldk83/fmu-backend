@@ -19,7 +19,61 @@ from fmpy.util import plot_result
 
 FMU_FILE = "FirstOrder.fmu"
 
+# -------------------------------------------------------------------- #
+# New dynamic simulation
+# -------------------------------------------------------------------- #
+# fmu_server.py
+from flask import request, jsonify
+from fmpy import extract
+from fmpy.fmi2 import FMU2Slave
+
 app = Flask(__name__)
+
+# Global FMU state
+fmu = None
+time = 0.0
+step_size = 1e-2
+vr_input = None
+vr_output = None
+
+@app.route('/init')
+def init():
+    global fmu, time, vr_input, vr_output
+    unzipdir = extract('CoupledClutches.fmu')
+    model_desc = read_model_description(unzipdir)
+
+    vrs = {v.name: v.valueReference for v in model_desc.modelVariables}
+    vr_input = vrs['inputs']
+    vr_output = vrs['outputs[4]']
+
+    fmu = FMU2Slave(
+        guid=model_desc.guid,
+        unzipDirectory=unzipdir,
+        modelIdentifier=model_desc.coSimulation.modelIdentifier,
+        instanceName='instance1'
+    )
+
+    fmu.instantiate()
+    fmu.setupExperiment()
+    fmu.enterInitializationMode()
+    fmu.exitInitializationMode()
+
+    time = 0.0
+    return "FMU initialized"
+
+@app.route('/update')
+def update_input():
+    value = float(request.args.get('input', 0.0))
+    fmu.setReal([vr_input], [value])
+    return f"Input updated to {value}"
+
+@app.route('/step')
+def step():
+    global time
+    fmu.doStep(currentCommunicationPoint=time, communicationStepSize=step_size)
+    time += step_size
+    input_val, output_val = fmu.getReal([vr_input, vr_output])
+    return jsonify({'time': time, 'input': input_val, 'output': output_val})
 
 # -------------------------------------------------------------------- #
 # 1) dump(fmu)  ->  /dump
