@@ -83,6 +83,60 @@ def plot():
 
     return pio.to_html(fig, full_html=True)
 
+@app.route('/chart')
+def chart():
+    result = simulate_fmu(FMU_FILE)
+    time = result['time'].tolist()
+    a = result['a'].tolist()
+
+    # Render the HTML with embedded Chart.js and data
+    html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Chart.js FMU Plot</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body>
+        <h2 style="text-align:center;">FMU Simulation Result (Chart.js)</h2>
+        <canvas id="fmuChart" width="800" height="400"></canvas>
+        <script>
+            const ctx = document.getElementById('fmuChart').getContext('2d');
+            const chart = new Chart(ctx, {{
+                type: 'line',
+                data: {{
+                    labels: {time},
+                    datasets: [{{
+                        label: 'a vs time',
+                        data: {a},
+                        borderColor: 'blue',
+                        fill: false,
+                        tension: 0.2
+                    }}]
+                }},
+                options: {{
+                    responsive: true,
+                    scales: {{
+                        x: {{
+                            title: {{
+                                display: true,
+                                text: 'time [s]'
+                            }}
+                        }},
+                        y: {{
+                            title: {{
+                                display: true,
+                                text: 'a'
+                            }}
+                        }}
+                    }}
+                }}
+            }});
+        </script>
+    </body>
+    </html>
+    """
+    return html
 
 
 # optional helper route so users land somewhere nice
@@ -93,6 +147,8 @@ def index():
     <ul>
       <li><a href="/dump">/dump</a> &nbsp;→ show model information (like <code>dump(fmu)</code>)</li>
       <li><a href="/plot">/plot</a> &nbsp;→ run simulation &amp; display plot</li>
+      <li><a href="/chart">/chart</a> &nbsp;→ run simulation &amp; display plot</li>
+      <li><a href="/variables">/variables</a> &nbsp;→ run simulation &amp; display plot</li>
     </ul>
     """
     return render_template_string(html)
