@@ -26,8 +26,11 @@ FMU_FILE = "FirstOrder.fmu"
 from flask import request, jsonify
 from fmpy import extract
 from fmpy.fmi2 import FMU2Slave
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 
 # Global FMU state
 fmu = None
