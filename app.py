@@ -17,7 +17,7 @@ from flask import Flask, send_file, render_template_string, redirect, url_for
 from fmpy import read_model_description, simulate_fmu
 from fmpy.util import plot_result
 
-FMU_FILE = "TwoMasses.fmu"
+FMU_FILE = "FirstOrder.fmu"
 
 app = Flask(__name__)
 
