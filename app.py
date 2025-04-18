@@ -42,7 +42,7 @@ vr_output = None
 @app.route('/init')
 def init():
     global fmu, time, vr_input, vr_output
-    unzipdir = extract('CoupledClutches.fmu')
+    unzipdir = extract('FirstOrder.fmu')
     model_desc = read_model_description(unzipdir)
 
     vrs = {v.name: v.valueReference for v in model_desc.modelVariables}
@@ -182,7 +182,7 @@ def chart():
 @app.route("/")
 def index():
     html = """
-    <h2>FMPy + Flask demo (Rectifier.fmu)</h2>
+    <h2>FMPy + Flask demo (FirtOrder.fmu)</h2>
     <ul>
       <li><a href="/dump">/dump</a> &nbsp;→ show model information (like <code>dump(fmu)</code>)</li>
       <li><a href="/chart">/chart</a> &nbsp;→ run simulation &amp; display plot</li>
