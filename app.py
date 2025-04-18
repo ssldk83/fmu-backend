@@ -67,10 +67,8 @@ def chart():
     result = simulate_fmu(FMU_FILE)
 
     time = result['time'].tolist()
-    T1 = result['mass1.T'].tolist()
-    T2 = result['mass2.T'].tolist()
+    x = result['x'].tolist()
 
-    # Use Chart.js with both datasets
     html = f"""
     <!DOCTYPE html>
     <html>
@@ -79,7 +77,7 @@ def chart():
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body>
-        <h2 style="text-align:center;">FMU Simulation Result (Chart.js)</h2>
+        <h2 style="text-align:center;">FMU Simulation Result: x vs time</h2>
         <canvas id="fmuChart" width="800" height="400"></canvas>
         <script>
             const ctx = document.getElementById('fmuChart').getContext('2d');
@@ -87,20 +85,13 @@ def chart():
                 type: 'line',
                 data: {{
                     labels: {time},
-                    datasets: [
-                        {{
-                            label: 'mass1.T',
-                            data: {T1},
-                            borderColor: 'red',
-                            fill: false
-                        }},
-                        {{
-                            label: 'mass2.T',
-                            data: {T2},
-                            borderColor: 'blue',
-                            fill: false
-                        }}
-                    ]
+                    datasets: [{{
+                        label: 'x',
+                        data: {x},
+                        borderColor: 'green',
+                        fill: false,
+                        tension: 0.3
+                    }}]
                 }},
                 options: {{
                     responsive: true,
@@ -114,7 +105,7 @@ def chart():
                         y: {{
                             title: {{
                                 display: true,
-                                text: 'Temperature [T]'
+                                text: 'x'
                             }}
                         }}
                     }}
@@ -125,6 +116,7 @@ def chart():
     </html>
     """
     return html
+
 
 
 # -------------------------------------------------------------------- #
