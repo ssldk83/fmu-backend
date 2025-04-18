@@ -1,4 +1,6 @@
+# -------------------------------------------------------------------- #
 # app.py
+# -------------------------------------------------------------------- #
 """
 Flask + FMPy mini‑demo
 ----------------------
@@ -60,13 +62,15 @@ def dump_fmu():
 # -------------------------------------------------------------------- #
 # 2) simulate_fmu(fmu) + 3) plot_result(result)  ->  /plot
 # -------------------------------------------------------------------- #
-@app.route('/chart')
+@app.route("/chart")
 def chart():
     result = simulate_fmu(FMU_FILE)
-    time = result['time'].tolist()
-    a = result['a'].tolist()
 
-    # Render the HTML with embedded Chart.js and data
+    time = result['time'].tolist()
+    T1 = result['mass1.T'].tolist()
+    T2 = result['mass2.T'].tolist()
+
+    # Use Chart.js with both datasets
     html = f"""
     <!DOCTYPE html>
     <html>
@@ -83,13 +87,20 @@ def chart():
                 type: 'line',
                 data: {{
                     labels: {time},
-                    datasets: [{{
-                        label: 'a vs time',
-                        data: {a},
-                        borderColor: 'blue',
-                        fill: false,
-                        tension: 0.2
-                    }}]
+                    datasets: [
+                        {{
+                            label: 'mass1.T',
+                            data: {T1},
+                            borderColor: 'red',
+                            fill: false
+                        }},
+                        {{
+                            label: 'mass2.T',
+                            data: {T2},
+                            borderColor: 'blue',
+                            fill: false
+                        }}
+                    ]
                 }},
                 options: {{
                     responsive: true,
@@ -103,7 +114,7 @@ def chart():
                         y: {{
                             title: {{
                                 display: true,
-                                text: 'a'
+                                text: 'Temperature [T]'
                             }}
                         }}
                     }}
@@ -116,7 +127,9 @@ def chart():
     return html
 
 
+# -------------------------------------------------------------------- #
 # optional helper route so users land somewhere nice
+# -------------------------------------------------------------------- #
 @app.route("/")
 def index():
     html = """
