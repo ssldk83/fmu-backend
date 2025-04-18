@@ -26,6 +26,24 @@ app = Flask(__name__)
 def dump_fmu():
     md = read_model_description(FMU_FILE)
 
+    info = f"""
+Model Info
+-----------
+FMI Version       {md.fmiVersion}
+Model Name        {md.modelName}
+Description       {md.description or ''}
+Platforms         {", ".join(md.coSimulation.modelIdentifier)}
+Continuous States {md.numberOfContinuousStates}
+Event Indicators  {md.numberOfEventIndicators}
+Generation Tool   {md.generationTool}
+Generation Date   {md.generationDateAndTime}
+
+Default Experiment
+------------------
+Stop Time         {md.defaultExperiment.stopTime}
+Step Size         {md.defaultExperiment.stepSize}
+"""
+
     # list a few variables marked as outputs
     outputs = [
         v for v in md.modelVariables if v.causality == "output"
