@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, Output, Input
+from dash import dcc, html, Output, Input, State
 import plotly.graph_objs as go
 from fmpy import extract, read_model_description, instantiate_fmu
 import threading
@@ -10,9 +10,9 @@ import os
 app = dash.Dash(__name__)
 server = app.server
 
-FMU_PATH = "RealtimeOscillator.fmu"
+FMU_PATH = "CoupledClutches.fmu"
 STEP_SIZE = 1e-3
-STOP_TIME = 2.0
+STOP_TIME = 60.0  # increase simulation time for continuous feel
 
 sim_data = {
     "time": [],
@@ -47,7 +47,7 @@ def simulate_realtime():
         sim_data["output"] = []
         sim_data["running"] = True
 
-        while time_val < STOP_TIME and sim_data["running"]:
+        while sim_data["running"]:
             fmu.setReal([vr_inputs], [sim_data["param_value"]])
             fmu.doStep(currentCommunicationPoint=time_val, communicationStepSize=STEP_SIZE)
             y = fmu.getReal([vr_outputs])[0]
@@ -58,6 +58,11 @@ def simulate_realtime():
             time_val += STEP_SIZE
             time.sleep(STEP_SIZE)
 
+            if time_val > STOP_TIME:
+                time_val = 0.0
+                sim_data["time"] = []
+                sim_data["output"] = []
+
         fmu.terminate()
         fmu.freeInstance()
         os.system(f"rm -rf {unzipdir}")
@@ -66,9 +71,9 @@ def simulate_realtime():
         print(f"Simulation error: {e}")
         sim_data["running"] = False
 
-# Run simulation in background
-thread = threading.Thread(target=simulate_realtime)
-thread.start()
+if not sim_data["running"]:
+    thread = threading.Thread(target=simulate_realtime)
+    thread.start()
 
 app.layout = html.Div([
     html.H2("Coupled Clutches Simulation (Dash)"),
@@ -107,7 +112,7 @@ def update_graph(n):
         y = sim_data["output"]
     return {
         'data': [go.Scatter(x=t, y=y, mode='lines', line=dict(color='blue'))],
-        'layout': go.Layout(title='Output [4]', xaxis=dict(title='Time (s)'), yaxis=dict(title='Output'))
+        'layout': go.Layout(title='Output [4]', xaxis=dict(title='Time (s)'), yaxis=dict(title='Output'), uirevision='true')
     }
 
 if __name__ == '__main__':
