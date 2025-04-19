@@ -33,7 +33,7 @@ vr_input = None
 vr_output = None
 
 
-FMU_PATH = "CoupledClutches.fmu"  # Replace with your FMU
+FMU_PATH = "RealtimeOscillator.fmu"  # Replace with your FMU
 STEP_SIZE = 1e-3
 STOP_TIME = 2.0
 
