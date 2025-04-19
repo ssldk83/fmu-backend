@@ -1,34 +1,27 @@
 # -------------------------------------------------------------------- #
 # app.py
 # -------------------------------------------------------------------- #
-"""
-Flask + FMPy mini‑demo
-----------------------
-• Place Rectifier.fmu in the same folder as this file
-• pip install flask fmpy matplotlib
-• python app.py
-"""
 
-import io, os, tempfile
+from flask import Flask, send_file, render_template_string, redirect, url_for, request, jsonify
+from fmpy import read_model_description, simulate_fmu, instantiate_fmu, extract
+from fmpy.util import plot_result
+from fmpy.fmi2 import FMU2Slave
+from flask_cors import CORS
+
+import threading
+import time
+import numpy as np
+import os
+
+import io, tempfile
 import matplotlib
 matplotlib.use('Agg')  # render plots without a display
-
-from flask import Flask, send_file, render_template_string, redirect, url_for
-from fmpy import read_model_description, simulate_fmu
-from fmpy.util import plot_result
-
-FMU_FILE = "FirstOrder.fmu"
 
 # -------------------------------------------------------------------- #
 # New dynamic simulation
 # -------------------------------------------------------------------- #
-# fmu_server.py
-from flask import request, jsonify
-from fmpy import extract
-from fmpy.fmi2 import FMU2Slave
-from flask_cors import CORS
 
-
+FMU_FILE = "RealtimeOscillator.fmu"
 app = Flask(__name__)
 CORS(app)
 
@@ -39,44 +32,69 @@ step_size = 1e-2
 vr_input = None
 vr_output = None
 
-@app.route('/init')
-def init():
-    global fmu, time, vr_input, vr_output
-    unzipdir = extract('FirstOrder.fmu')
-    model_desc = read_model_description(unzipdir)
 
-    vrs = {v.name: v.valueReference for v in model_desc.modelVariables}
-    vr_input = vrs['inputs']
-    vr_output = vrs['outputs[4]']
+FMU_PATH = "CoupledClutches.fmu"  # Replace with your FMU
+STEP_SIZE = 1e-3
+STOP_TIME = 2.0
 
-    fmu = FMU2Slave(
-        guid=model_desc.guid,
-        unzipDirectory=unzipdir,
-        modelIdentifier=model_desc.coSimulation.modelIdentifier,
-        instanceName='instance1'
-    )
+# Global simulation state
+sim_data = {
+    "time": [],
+    "output": [],
+    "param_value": 0.0,
+    "running": False
+}
 
-    fmu.instantiate()
+def simulate_realtime():
+    unzipdir = extract(FMU_PATH)
+    model_description = read_model_description(unzipdir)
+    fmu = instantiate_fmu(unzipdir=unzipdir, model_description=model_description, fmi_type='CoSimulation')
+
     fmu.setupExperiment()
     fmu.enterInitializationMode()
     fmu.exitInitializationMode()
 
-    time = 0.0
-    return "FMU initialized"
+    time_val = 0.0
+    vr_inputs = [v.valueReference for v in model_description.modelVariables if v.name == "inputs"][0]
+    vr_outputs = [v.valueReference for v in model_description.modelVariables if v.name == "outputs[4]"][0]
 
-@app.route('/update')
-def update_input():
-    value = float(request.args.get('input', 0.0))
-    fmu.setReal([vr_input], [value])
-    return f"Input updated to {value}"
+    sim_data["time"] = []
+    sim_data["output"] = []
+    sim_data["running"] = True
 
-@app.route('/step')
-def step():
-    global time
-    fmu.doStep(currentCommunicationPoint=time, communicationStepSize=step_size)
-    time += step_size
-    input_val, output_val = fmu.getReal([vr_input, vr_output])
-    return jsonify({'time': time, 'input': input_val, 'output': output_val})
+    while time_val < STOP_TIME and sim_data["running"]:
+        # Allow real-time input change
+        fmu.setReal([vr_inputs], [sim_data["param_value"]])
+
+        fmu.doStep(currentCommunicationPoint=time_val, communicationStepSize=STEP_SIZE)
+        y = fmu.getReal([vr_outputs])[0]
+
+        sim_data["time"].append(time_val)
+        sim_data["output"].append(y)
+
+        time_val += STEP_SIZE
+        time.sleep(STEP_SIZE)  # Simulate real-time
+
+    fmu.terminate()
+    fmu.freeInstance()
+    os.system(f"rm -rf {unzipdir}")
+
+@app.route("/simulate", methods=["POST"])
+def start_sim():
+    if not sim_data["running"]:
+        thread = threading.Thread(target=simulate_realtime)
+        thread.start()
+    return jsonify({"status": "simulation started"})
+
+@app.route("/update", methods=["POST"])
+def update_param():
+    new_val = request.json.get("value")
+    sim_data["param_value"] = float(new_val)
+    return jsonify({"status": "updated", "new_value": sim_data["param_value"]})
+
+@app.route("/data", methods=["GET"])
+def get_data():
+    return jsonify({"time": sim_data["time"], "output": sim_data["output"]})
 
 # -------------------------------------------------------------------- #
 # 1) dump(fmu)  ->  /dump
