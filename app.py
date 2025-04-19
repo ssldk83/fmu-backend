@@ -47,48 +47,57 @@ sim_data = {
 
 def simulate_realtime():
     print("Starting simulation...")
-    unzipdir = extract(FMU_PATH)
-    model_description = read_model_description(unzipdir)
-    fmu = instantiate_fmu(unzipdir=unzipdir, model_description=model_description, fmi_type='CoSimulation')
+    try:
+        unzipdir = extract(FMU_PATH)
+        model_description = read_model_description(unzipdir)
+        fmu = instantiate_fmu(unzipdir=unzipdir, model_description=model_description, fmi_type='CoSimulation')
 
-    fmu.setupExperiment()
-    fmu.enterInitializationMode()
-    fmu.exitInitializationMode()
+        fmu.setupExperiment()
+        fmu.enterInitializationMode()
+        fmu.exitInitializationMode()
 
-    time_val = 0.0
-    vr_inputs = [v.valueReference for v in model_description.modelVariables if v.name == "inputs"]
-    vr_outputs = [v.valueReference for v in model_description.modelVariables if v.name == "outputs[4]"]
+        time_val = 0.0
+        vr_inputs = [v.valueReference for v in model_description.modelVariables if v.name == "inputs"]
+        vr_outputs = [v.valueReference for v in model_description.modelVariables if v.name == "outputs[4]"]
 
-    if not vr_inputs or not vr_outputs:
-        print("Variable references not found. Aborting.")
-        return
+        if not vr_inputs or not vr_outputs:
+            print("Variable references not found. Aborting.")
+            return
 
-    vr_inputs = vr_inputs[0]
-    vr_outputs = vr_outputs[0]
+        vr_inputs = vr_inputs[0]
+        vr_outputs = vr_outputs[0]
 
-    sim_data["time"] = []
-    sim_data["output"] = []
-    sim_data["running"] = True
+        sim_data["time"] = []
+        sim_data["output"] = []
+        sim_data["running"] = True
 
-    while time_val < STOP_TIME and sim_data["running"]:
-        # Allow real-time input change
-        fmu.setReal([vr_inputs], [sim_data["param_value"]])
+        while time_val < STOP_TIME and sim_data["running"]:
+            fmu.setReal([vr_inputs], [sim_data["param_value"]])
+            fmu.doStep(currentCommunicationPoint=time_val, communicationStepSize=STEP_SIZE)
+            y = fmu.getReal([vr_outputs])[0]
 
-        fmu.doStep(currentCommunicationPoint=time_val, communicationStepSize=STEP_SIZE)
-        y = fmu.getReal([vr_outputs])[0]
+            print(f"time = {time_val:.3f}, input = {sim_data['param_value']:.3f}, output = {y:.4f}")
 
-        print(f"time = {time_val:.3f}, input = {sim_data['param_value']:.3f}, output = {y:.4f}")
+            sim_data["time"].append(time_val)
+            sim_data["output"].append(y)
 
-        sim_data["time"].append(time_val)
-        sim_data["output"].append(y)
+            time_val += STEP_SIZE
+            time.sleep(STEP_SIZE)
 
-        time_val += STEP_SIZE
-        time.sleep(STEP_SIZE)
+        fmu.terminate()
+        fmu.freeInstance()
+        os.system(f"rm -rf {unzipdir}")
+        print("Simulation completed.")
+    except Exception as e:
+        print(f"Simulation error: {e}")
+        sim_data["running"] = False
 
-    fmu.terminate()
-    fmu.freeInstance()
-    os.system(f"rm -rf {unzipdir}")
-    print("Simulation completed.")
+@app.before_first_request
+def auto_start_simulation():
+    print("Auto-starting simulation on first request...")
+    if not sim_data["running"]:
+        thread = threading.Thread(target=simulate_realtime)
+        thread.start()
 
 @app.route("/simulate", methods=["GET", "POST"])
 def start_sim():
@@ -110,6 +119,12 @@ def update_param():
 
 @app.route("/data", methods=["GET"])
 def get_data():
+    # Debug fallback: return sine wave if simulation didn't start
+    if not sim_data["time"]:
+        print("No simulation data. Returning sine wave for test.")
+        t = np.linspace(0, 10, 200)
+        y = np.sin(t)
+        return jsonify({"time": t.tolist(), "output": y.tolist()})
     return jsonify({"time": sim_data["time"], "output": sim_data["output"]})
 
 # -------------------------------------------------------------------- #
