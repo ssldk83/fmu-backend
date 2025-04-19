@@ -10,7 +10,7 @@ import os
 app = dash.Dash(__name__)
 server = app.server
 
-FMU_PATH = "CoupledClutches.fmu"
+FMU_PATH = "RealtimeOscillator.fmu"
 STEP_SIZE = 1e-3
 STOP_TIME = 60.0  # increase simulation time for continuous feel
 
