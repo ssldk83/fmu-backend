@@ -81,9 +81,13 @@ def simulate_realtime():
 
 @app.route("/simulate", methods=["POST"])
 def start_sim():
+    print("Simulation requested...")
     if not sim_data["running"]:
         thread = threading.Thread(target=simulate_realtime)
         thread.start()
+        print("Simulation thread started.")
+    else:
+        print("Simulation already running.")
     return jsonify({"status": "simulation started"})
 
 @app.route("/update", methods=["POST"])
