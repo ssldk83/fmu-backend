@@ -2,3 +2,6 @@ flask
 fmpy
 flask-cors
 matplotlib
+dash
+plotly
+gunicorn
