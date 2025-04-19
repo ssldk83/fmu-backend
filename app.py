@@ -46,6 +46,7 @@ sim_data = {
 }
 
 def simulate_realtime():
+    print("Starting simulation...")
     unzipdir = extract(FMU_PATH)
     model_description = read_model_description(unzipdir)
     fmu = instantiate_fmu(unzipdir=unzipdir, model_description=model_description, fmi_type='CoSimulation')
@@ -55,8 +56,15 @@ def simulate_realtime():
     fmu.exitInitializationMode()
 
     time_val = 0.0
-    vr_inputs = [v.valueReference for v in model_description.modelVariables if v.name == "inputs"][0]
-    vr_outputs = [v.valueReference for v in model_description.modelVariables if v.name == "outputs[4]"][0]
+    vr_inputs = [v.valueReference for v in model_description.modelVariables if v.name == "inputs"]
+    vr_outputs = [v.valueReference for v in model_description.modelVariables if v.name == "outputs[4]"]
+
+    if not vr_inputs or not vr_outputs:
+        print("Variable references not found. Aborting.")
+        return
+
+    vr_inputs = vr_inputs[0]
+    vr_outputs = vr_outputs[0]
 
     sim_data["time"] = []
     sim_data["output"] = []
@@ -69,17 +77,20 @@ def simulate_realtime():
         fmu.doStep(currentCommunicationPoint=time_val, communicationStepSize=STEP_SIZE)
         y = fmu.getReal([vr_outputs])[0]
 
+        print(f"time = {time_val:.3f}, input = {sim_data['param_value']:.3f}, output = {y:.4f}")
+
         sim_data["time"].append(time_val)
         sim_data["output"].append(y)
 
         time_val += STEP_SIZE
-        time.sleep(STEP_SIZE)  # Simulate real-time
+        time.sleep(STEP_SIZE)
 
     fmu.terminate()
     fmu.freeInstance()
     os.system(f"rm -rf {unzipdir}")
+    print("Simulation completed.")
 
-@app.route("/simulate", methods=["POST"])
+@app.route("/simulate", methods=["GET", "POST"])
 def start_sim():
     print("Simulation requested...")
     if not sim_data["running"]:
@@ -94,6 +105,7 @@ def start_sim():
 def update_param():
     new_val = request.json.get("value")
     sim_data["param_value"] = float(new_val)
+    print(f"Updated parameter to {sim_data['param_value']:.3f}")
     return jsonify({"status": "updated", "new_value": sim_data["param_value"]})
 
 @app.route("/data", methods=["GET"])
