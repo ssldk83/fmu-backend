@@ -50,7 +50,7 @@ def init_cv(server):
         <style>
             @page { size: A4; margin: 2cm; }
             body {
-                font-family: 'Segoe UI', sans-serif;
+                font-family: 'Lato', sans-serif;
                 font-size: 11pt;
                 color: #222;
                 line-height: 1.5;
