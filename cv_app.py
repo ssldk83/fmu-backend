@@ -70,7 +70,7 @@ def init_cv(server):
                 CVR: 45118711</p>
             </div>
             <div class="photo">
-                <img src="image1.jpg" alt="Saeed photo">
+                <img src="assets/portrait1.jpg" alt="Saeed photo">
             </div>
         </div>
 
@@ -161,7 +161,7 @@ def init_cv(server):
         '''
 
         output = BytesIO()
-        HTML(string=full_html, base_url="/mnt/data/").write_pdf(output)
+        HTML(string=full_html, base_url=".").write_pdf(output)
         encoded_pdf = base64.b64encode(output.getvalue()).decode()
 
         return html.A("📄 Download Full CV (PDF)", href=f"data:application/pdf;base64,{encoded_pdf}",
