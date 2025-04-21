@@ -14,7 +14,6 @@ PtA Block‑Flow Diagram (BFD) rendered with Dash + Plotly
   arrows in the `flows` list.
 """
 
-
 external_stylesheets = [
     "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css",
 ]
@@ -23,6 +22,7 @@ def init_pfd_nh3(server):
         __name__,
         server=server,
         external_stylesheets=external_stylesheets,
+        url_base_pathname='/pfd_nh3/'
         suppress_callback_exceptions=True,
     )
 

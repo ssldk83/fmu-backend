@@ -12,7 +12,7 @@ app = Dash(__name__, server=server, suppress_callback_exceptions=True)  # Main D
 
 app.layout = html.Div([
     html.H1("FMU Dashboard Hub"),
-    html.P("Visit /firstorder/ or /nh3balance/")
+    html.P("Visit /firstorder/, /pfd_nh3/ or /nh3balance/")
 ], className="dash-container")
 
 # Attach subapps to the same server
