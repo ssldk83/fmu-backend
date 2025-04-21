@@ -5,7 +5,7 @@ import base64
 from io import BytesIO
 from weasyprint import HTML
 
-def init_cv_app(server):
+def init_cv(server):
     app = dash.Dash(
         __name__,
         server=server,
