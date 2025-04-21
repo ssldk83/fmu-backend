@@ -42,7 +42,6 @@ def init_cv(server):
         if n_clicks == 0:
             return ""
 
-        # Full HTML CV content pasted directly here
         full_html = '''
         <!DOCTYPE html>
         <html>
@@ -64,10 +63,10 @@ def init_cv(server):
             <div>
                 <h1>Saeed S. Lafmejani</h1>
                 <p><strong>Process / Project Engineer</strong><br>
-                9260 Gistrup, Denmark<br>
-                Danish passport<br>
-                Email: ssl@G4iE.dk<br>
+                Address: 9260 Gistrup, Denmark<br>
+                Passport: Danish<br>
                 Phone: +45-2678-2233<br>
+                Email: ssl@G4iE.dk<br>
                 CVR: 45118711</p>
             </div>
             <div class="photo">
@@ -76,62 +75,89 @@ def init_cv(server):
         </div>
 
         <h2>Summary</h2>
-        <p>Consultant focused on Process Flow Diagrams (PFDs), P&IDs, and process design for PtX, CCUS, Biogas, and Power Plants using AutoCAD Plant and Excel-based tools.</p>
+        <p>As a consultant, I specialize in the preparation of high-quality Process Flow Diagrams (PFDs), Piping and Instrumentation Diagrams (P&IDs), and extracting lists (valves, instruments, components, etc.) using AutoCAD Plant. I am also actively engaged in developing heat and mass balances to support the design and optimization of various plant types, such as Power-to-X (PtX), Carbon Capture, Utilization and Storage (CCUS), Biogas and Power Plants.</p>
 
         <h2>Professional Experience</h2>
-        <h3>Self-Employed – G4iE ApS</h3>
+        <h3>Self-Employed</h3>
+        <p>Nov. 2027 – present, G4iE ApS, Gistrup, Denmark</p>
         <ul>
-            <li>Site inspection of a power-to-ammonia plant in Denmark</li>
-            <li>PFD & P&ID design for biogas plants in Belgium and UK</li>
-            <li>MW-scale air-source heat pump system design</li>
-            <li>Innovation in PtX and CCUS technologies</li>
+            <li>Site inspection and due diligence of a dynamic power to ammonia plant in Denmark.</li>
+            <li>Prepare PFD for a biogas plant in Belgium.</li>
+            <li>Prepare PFD and P&ID for a biogas plant in the UK.</li>
+            <li>Design MW scaled air-source heat pump plant.</li>
+            <li>Developing innovative solutions within Power-to-X and CCUS.</li>
         </ul>
-        <h3>Senior Specialist – COWI</h3>
+
+        <h3>Senior Specialist</h3>
+        <p>Jan. 2023 – Sep. 2024, COWI, Aalborg, Denmark</p>
         <ul>
-            <li>Process design of 1GW hydrogen plant (PlugPower)</li>
-            <li>PFDs, P&IDs, and vent system design for H2/O2</li>
-            <li>Feasibility studies and HYSYS simulations</li>
-            <li>CCUS technical data support to Danish Energy Agency</li>
+            <li>Process design for a 1GW hydrogen production plant, integrating PlugPower’s electrolysis modules.</li>
+            <li>Developed PFDs, P&IDs, and designed vent systems for hydrogen and oxygen lines.</li>
+            <li>Conducted feasibility studies for carbon capture and green hydrogen projects in Denmark.</li>
+            <li>Performed ASPEN HYSYS calculations and sized safety equipment to API 520, 521.</li>
+            <li>Updated “Technology Data for Carbon Capture, Transport and Storage” for Energistyrrelsen.</li>
+            <li>Prepared PFD and simulation for a CCS plant.</li>
         </ul>
-        <h3>PtX Senior Engineer – Blue Power Partners</h3>
+
+        <h3>PtX Senior Process Engineer - Owners Engineering</h3>
+        <p>Jan. 2022 - Dec. 2022, Blue Power Partners, Aalborg, Denmark</p>
         <ul>
-            <li>Techno-economic assessments of green ammonia projects</li>
-            <li>LCoA modeling and CAPEX/OPEX estimation</li>
+            <li>Feasibility studies and techno-economic assessments for green ammonia plants in Morocco and Chile.</li>
+            <li>Designed plant layouts, developed CAPEX/OPEX models, and assessed LCoA.</li>
         </ul>
-        <h3>Project Engineer – Nature Energy A/S</h3>
+
+        <h3>Project Engineer</h3>
+        <p>Feb. 2019 - Jan. 2022, Nature Energy A/S, Støvring, Denmark</p>
         <ul>
-            <li>Design of biogas plants: PFDs, P&IDs, H&M balances</li>
-            <li>Electrolyzer and bio-trickling filter integration</li>
-            <li>Equipment sizing and safety/risk analysis</li>
+            <li>Detailed design of biogas plants: H&M balances, PFDs, P&IDs, 3D model reviews.</li>
+            <li>Specified heat exchangers, pumps, and boilers.</li>
+            <li>Pipe, valve, and pump selection (Grundfos, dosing, displacement types).</li>
+            <li>Integrated 9 MW electrolyser and bio-trickling filters into biogas plant.</li>
+            <li>Conducted risk assessments, troubleshooting, and optimization.</li>
         </ul>
-        <h3>PhD – Aalborg University</h3>
+
+        <h3>PhD Stipend</h3>
+        <p>Jan. 2016 - Jan. 2019, Energy Technology Dep., Aalborg University</p>
         <ul>
-            <li>Design and simulation of PEM electrolysis systems</li>
-            <li>Published and presented in international conferences</li>
+            <li>Designed and tested PEM water electrolysis systems.</li>
+            <li>Presented electrolysis research at international conferences.</li>
         </ul>
-        <h3>Internship – Forschungszentrum Jülich</h3>
+
+        <h3>Visiting Internship</h3>
+        <p>Jul. 2017 - Dec. 2017, Forschungszentrum Jülich, Germany</p>
         <ul>
-            <li>Efficiency improvement of large stack electrolyzers</li>
+            <li>Contributed to large electrolyser stack design and efficiency improvement.</li>
         </ul>
+
+        <h3>Researcher</h3>
+        <p>2014 - 2016, Energy Technology Dep., Aalborg University</p>
+
+        <h3>Consultant</h3>
+        <p>2013 - 2014, R&R Consult, Aalborg, Denmark</p>
 
         <h2>Education</h2>
-        <ul>
-            <li>PhD in Water Electrolysis, Aalborg University</li>
-        </ul>
+        <p>PhD in water electrolysis, Aalborg University, Jan. 2016 – Jan. 2019</p>
 
-        <h2>Languages</h2>
+        <h2>Language</h2>
         <ul>
             <li>English</li>
             <li>Danish</li>
         </ul>
 
+        <h2>Personal Competences</h2>
+        <ul>
+            <li>Self-motivated, result-oriented, and analytical.</li>
+            <li>Strong-willed with a systematic approach to problem-solving.</li>
+        </ul>
+
         <h2>Technical Skills</h2>
         <ul>
-            <li><strong>Process Simulation:</strong> HYSYS, FLARE, AutoCAD Plant</li>
-            <li><strong>Safety & Standards:</strong> PED, ISO 22734, API 520/521</li>
-            <li><strong>Programming:</strong> Excel VBA</li>
+            <li><strong>Process Simulation and Design:</strong> ASPEN HYSYS, FLARE, PLUS, AutoCAD Plant.</li>
+            <li><strong>Safety and Standards:</strong> PED, ISO 22734, API 520, 521.</li>
+            <li><strong>Programming:</strong> Excel VBA for process calculations and modelling.</li>
         </ul>
-        </body></html>
+        </body>
+        </html>
         '''
 
         output = BytesIO()
