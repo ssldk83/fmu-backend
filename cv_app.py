@@ -5,7 +5,7 @@ import base64
 from io import BytesIO
 from weasyprint import HTML
 
-def init_cv(server):
+def init_cv_app(server):
     app = dash.Dash(
         __name__,
         server=server,
@@ -49,13 +49,38 @@ def init_cv(server):
         <meta charset="utf-8">
         <style>
             @page { size: A4; margin: 2cm; }
-            body { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #222; line-height: 1.5; }
-            h1, h2, h3 { color: #004080; margin-top: 1.2em; }
-            p, li { margin: 0.3em 0; }
-            ul { padding-left: 1.2em; }
-            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #888; padding-bottom: 1em; margin-bottom: 2em; }
-            .photo { width: 100px; }
-            .photo img { width: 100%; border-radius: 8px; }
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 11pt;
+                color: #222;
+                line-height: 1.5;
+                -webkit-print-color-adjust: exact;
+            }
+            h1, h2, h3 {
+                color: #004080;
+                margin-top: 1.2em;
+            }
+            p, li {
+                margin: 0.3em 0;
+            }
+            ul {
+                padding-left: 1.2em;
+            }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid #888;
+                padding-bottom: 1em;
+                margin-bottom: 2em;
+            }
+            .photo {
+                width: 100px;
+            }
+            .photo img {
+                width: 100%;
+                border-radius: 8px;
+            }
         </style>
         </head>
         <body>
@@ -93,40 +118,40 @@ def init_cv(server):
         <ul>
             <li>Process design for a 1GW hydrogen production plant, integrating PlugPower’s electrolysis modules.</li>
             <li>Developed PFDs, P&IDs, and designed vent systems for hydrogen and oxygen lines.</li>
-            <li>Conducted feasibility studies for carbon capture and green hydrogen projects in Denmark.</li>
-            <li>Performed ASPEN HYSYS calculations and sized safety equipment to API 520, 521.</li>
-            <li>Updated “Technology Data for Carbon Capture, Transport and Storage” for Energistyrrelsen.</li>
-            <li>Prepared PFD and simulation for a CCS plant.</li>
+            <li>Conducted feasibility studies for carbon capture and green hydrogen projects in Denmark, assessing key electrolyser technologies.</li>
+            <li>Performed calculations in ASPEN HYSYS and sized critical safety equipment to industry standards (API 520, 521).</li>
+            <li>Involved in updating “Technology Data for Carbon Capture, Transport and Storage” for Energistyrrelsen, Denmark.</li>
+            <li>Prepared PFD and process simulation for a carbon capture and storage plant.</li>
         </ul>
 
         <h3>PtX Senior Process Engineer - Owners Engineering</h3>
         <p>Jan. 2022 - Dec. 2022, Blue Power Partners, Aalborg, Denmark</p>
         <ul>
-            <li>Feasibility studies and techno-economic assessments for green ammonia plants in Morocco and Chile.</li>
-            <li>Designed plant layouts, developed CAPEX/OPEX models, and assessed LCoA.</li>
+            <li>Conducted feasibility studies and techno-economic assessments for green ammonia plants in Morocco and southern Chile, integrating renewable energy sources.</li>
+            <li>Designed plant layouts, developed CAPEX/OPEX models, and assessed the levelized cost of ammonia (LCoA).</li>
         </ul>
 
         <h3>Project Engineer</h3>
         <p>Feb. 2019 - Jan. 2022, Nature Energy A/S, Støvring, Denmark</p>
         <ul>
-            <li>Detailed design of biogas plants: H&M balances, PFDs, P&IDs, 3D model reviews.</li>
-            <li>Specified heat exchangers, pumps, and boilers.</li>
-            <li>Pipe, valve, and pump selection (Grundfos, dosing, displacement types).</li>
-            <li>Integrated 9 MW electrolyser and bio-trickling filters into biogas plant.</li>
-            <li>Conducted risk assessments, troubleshooting, and optimization.</li>
+            <li>Detailed design of biogas plants including preparing heat and mass balance, PFDs and P&IDs. Review 3D models, and piping drawings.</li>
+            <li>Prepare component specifications for heat exchangers, heat pumps, boiler, etc.</li>
+            <li>Select the right pipe type, valves, Grundfos centrifugal pumps, dosing pumps or biomass positive displacement pumps.</li>
+            <li>Involved in integrating a 9 MW electrolyser and bio-trickling bed technology into an existing biogas plant, boosting methane production.</li>
+            <li>Conducted risk assessments, plant troubleshooting, and process optimization.</li>
         </ul>
 
         <h3>PhD Stipend</h3>
         <p>Jan. 2016 - Jan. 2019, Energy Technology Dep., Aalborg University</p>
         <ul>
-            <li>Designed and tested PEM water electrolysis systems.</li>
-            <li>Presented electrolysis research at international conferences.</li>
+            <li>Designed and tested PEM water electrolysis systems, contributing to hydrogen production advancements.</li>
+            <li>Simulated and analysed electrolysis processes, with findings presented at international conferences.</li>
         </ul>
 
         <h3>Visiting Internship</h3>
         <p>Jul. 2017 - Dec. 2017, Forschungszentrum Jülich, Germany</p>
         <ul>
-            <li>Contributed to large electrolyser stack design and efficiency improvement.</li>
+            <li>Participated in a large electrolyser stack design project, focusing on improving electrolysis efficiency.</li>
         </ul>
 
         <h3>Researcher</h3>
