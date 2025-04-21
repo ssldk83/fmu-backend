@@ -22,7 +22,7 @@ def init_pfd_nh3(server):
         __name__,
         server=server,
         external_stylesheets=external_stylesheets,
-        url_base_pathname='/pfd_nh3/'
+        url_base_pathname='/pfd_nh3/',
         suppress_callback_exceptions=True,
     )
 
