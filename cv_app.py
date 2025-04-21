@@ -1,4 +1,4 @@
-# cv_generator_app.py (modular Dash app for Flask server, PDF output)
+# cv_generator_app.py (modular Dash app for Flask server, full-text PDF CV)
 import dash
 from dash import html, dcc, Input, Output, State
 import base64
@@ -42,147 +42,103 @@ def init_cv(server):
         if n_clicks == 0:
             return ""
 
-        keep_phrases = {
-            "biogas": ["biogas", "methane", "Nature Energy"],
-            "hydrogen": ["hydrogen", "electrolysis", "electrolyser", "PEM", "HYSYS", "PlugPower"],
-            "ptx": ["Power-to-X", "PtX", "green ammonia", "LCoA", "Blue Power"]
-        }
-
-        # Full HTML content with filtering support
-        html_template = '''
+        # Full HTML CV content pasted directly here
+        full_html = '''
         <!DOCTYPE html>
-        <html lang="en">
+        <html>
         <head>
-            <meta charset="UTF-8">
-            <title>Saeed S. Lafmejani – CV</title>
-            <style>
-                body {
-                    font-family: 'Segoe UI', sans-serif;
-                    margin: 0;
-                    padding: 2rem;
-                    line-height: 1.5;
-                    color: #222;
-                }
-                .header {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    border-bottom: 2px solid #aaa;
-                    padding-bottom: 1rem;
-                    margin-bottom: 2rem;
-                }
-                .profile-info {
-                    max-width: 65%;
-                }
-                .profile-info h1 {
-                    margin: 0;
-                    font-size: 1.8rem;
-                }
-                .contact {
-                    font-size: 0.9rem;
-                }
-                .photo img {
-                    width: 100px;
-                    border-radius: 8px;
-                }
-                h2 {
-                    border-bottom: 1px solid #ccc;
-                    margin-top: 2rem;
-                    padding-bottom: 0.25rem;
-                    font-size: 1.2rem;
-                    color: #004080;
-                }
-                ul {
-                    padding-left: 1.2rem;
-                }
-                .section {
-                    margin-bottom: 1.5rem;
-                }
-            </style>
+        <meta charset="utf-8">
+        <style>
+            @page { size: A4; margin: 2cm; }
+            body { font-family: 'Segoe UI', sans-serif; font-size: 11pt; color: #222; line-height: 1.5; }
+            h1, h2, h3 { color: #004080; margin-top: 1.2em; }
+            p, li { margin: 0.3em 0; }
+            ul { padding-left: 1.2em; }
+            .header { display: flex; justify-content: space-between; border-bottom: 2px solid #888; padding-bottom: 1em; margin-bottom: 2em; }
+            .photo { width: 100px; }
+            .photo img { width: 100%; border-radius: 8px; }
+        </style>
         </head>
         <body>
-
         <div class="header">
-            <div class="profile-info">
+            <div>
                 <h1>Saeed S. Lafmejani</h1>
-                <p class="contact">
-                    <strong>Role:</strong> Process / Project Engineer<br>
-                    <strong>Address:</strong> 9260 Gistrup, Denmark<br>
-                    <strong>Phone:</strong> +45 2678 2233<br>
-                    <strong>Email:</strong> ssl@G4iE.dk<br>
-                    <strong>CVR:</strong> 45118711<br>
-                    <strong>Passport:</strong> Danish
-                </p>
+                <p><strong>Process / Project Engineer</strong><br>
+                9260 Gistrup, Denmark<br>
+                Danish passport<br>
+                Email: ssl@G4iE.dk<br>
+                Phone: +45-2678-2233<br>
+                CVR: 45118711</p>
             </div>
             <div class="photo">
-                <img src="image1.jpg" alt="Saeed Photo">
+                <img src="image1.jpg" alt="Saeed photo">
             </div>
         </div>
 
-        <div class="section">
-            <h2>Summary</h2>
-            <p>Consultant specialized in Process Flow Diagrams (PFDs), P&IDs, and detailed plant design for PtX, CCUS, Biogas and Power Plants using AutoCAD Plant and Excel-based HMB tools. </p>
-        </div>
+        <h2>Summary</h2>
+        <p>Consultant focused on Process Flow Diagrams (PFDs), P&IDs, and process design for PtX, CCUS, Biogas, and Power Plants using AutoCAD Plant and Excel-based tools.</p>
 
-        <div class="section">
-            <h2>Professional Experience</h2>
-            <ul>
-                {jobs}
-            </ul>
-        </div>
+        <h2>Professional Experience</h2>
+        <h3>Self-Employed – G4iE ApS</h3>
+        <ul>
+            <li>Site inspection of a power-to-ammonia plant in Denmark</li>
+            <li>PFD & P&ID design for biogas plants in Belgium and UK</li>
+            <li>MW-scale air-source heat pump system design</li>
+            <li>Innovation in PtX and CCUS technologies</li>
+        </ul>
+        <h3>Senior Specialist – COWI</h3>
+        <ul>
+            <li>Process design of 1GW hydrogen plant (PlugPower)</li>
+            <li>PFDs, P&IDs, and vent system design for H2/O2</li>
+            <li>Feasibility studies and HYSYS simulations</li>
+            <li>CCUS technical data support to Danish Energy Agency</li>
+        </ul>
+        <h3>PtX Senior Engineer – Blue Power Partners</h3>
+        <ul>
+            <li>Techno-economic assessments of green ammonia projects</li>
+            <li>LCoA modeling and CAPEX/OPEX estimation</li>
+        </ul>
+        <h3>Project Engineer – Nature Energy A/S</h3>
+        <ul>
+            <li>Design of biogas plants: PFDs, P&IDs, H&M balances</li>
+            <li>Electrolyzer and bio-trickling filter integration</li>
+            <li>Equipment sizing and safety/risk analysis</li>
+        </ul>
+        <h3>PhD – Aalborg University</h3>
+        <ul>
+            <li>Design and simulation of PEM electrolysis systems</li>
+            <li>Published and presented in international conferences</li>
+        </ul>
+        <h3>Internship – Forschungszentrum Jülich</h3>
+        <ul>
+            <li>Efficiency improvement of large stack electrolyzers</li>
+        </ul>
 
-        <div class="section">
-            <h2>Education</h2>
-            <ul>
-                <li>PhD in Water Electrolysis – Aalborg University (2016–2019)</li>
-            </ul>
-        </div>
+        <h2>Education</h2>
+        <ul>
+            <li>PhD in Water Electrolysis, Aalborg University</li>
+        </ul>
 
-        <div class="section">
-            <h2>Languages</h2>
-            <ul>
-                <li>English</li>
-                <li>Danish</li>
-            </ul>
-        </div>
+        <h2>Languages</h2>
+        <ul>
+            <li>English</li>
+            <li>Danish</li>
+        </ul>
 
-        <div class="section">
-            <h2>Technical Skills</h2>
-            <ul>
-                <li><strong>Process Design:</strong> ASPEN HYSYS, AutoCAD Plant</li>
-                <li><strong>Standards:</strong> PED, ISO 22734, API 520/521</li>
-                <li><strong>Programming:</strong> Excel VBA</li>
-            </ul>
-        </div>
-
-        </body>
-        </html>
+        <h2>Technical Skills</h2>
+        <ul>
+            <li><strong>Process Simulation:</strong> HYSYS, FLARE, AutoCAD Plant</li>
+            <li><strong>Safety & Standards:</strong> PED, ISO 22734, API 520/521</li>
+            <li><strong>Programming:</strong> Excel VBA</li>
+        </ul>
+        </body></html>
         '''
 
-        job_data = [
-            ("G4iE", "Due diligence of a power-to-ammonia plant in Denmark", "biogas,ptx"),
-            ("G4iE", "PFD & P&ID design for biogas plants in Belgium & UK", "biogas"),
-            ("G4iE", "MW-scale air-source heat pump system design", "ptx"),
-            ("COWI", "Process design of a 1GW hydrogen production plant", "hydrogen,ptx"),
-            ("COWI", "Feasibility studies for hydrogen/CCUS projects", "hydrogen,ptx"),
-            ("COWI", "HYSYS simulations, safety system design per API standards", "hydrogen"),
-            ("Blue Power Partners", "Feasibility of green ammonia in Morocco & Chile", "ptx"),
-            ("Blue Power Partners", "LCoA and techno-economic assessments", "ptx"),
-            ("Nature Energy", "Process design & optimization of biogas plants", "biogas"),
-            ("Nature Energy", "Specification and selection of pumps, heat exchangers", "biogas")
-        ]
-
-        job_lines = []
-        for company, desc, tags in job_data:
-            if domain == "all" or domain in tags:
-                job_lines.append(f"<li><strong>{company}:</strong> {desc}</li>")
-
-        html_filled = html_template.replace("{jobs}", "\n".join(job_lines))
         output = BytesIO()
-        HTML(string=html_filled).write_pdf(output)
+        HTML(string=full_html, base_url="/mnt/data/").write_pdf(output)
         encoded_pdf = base64.b64encode(output.getvalue()).decode()
 
-        return html.A("📄 Download CV (PDF)", href=f"data:application/pdf;base64,{encoded_pdf}",
-                      download=f"cv_{domain}.pdf", target="_blank")
+        return html.A("📄 Download Full CV (PDF)", href=f"data:application/pdf;base64,{encoded_pdf}",
+                      download=f"cv_full.pdf", target="_blank")
 
     return app.server
