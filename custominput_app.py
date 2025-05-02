@@ -7,7 +7,6 @@ import traceback
 from uuid import uuid4
 from fmpy import read_model_description, extract
 from fmpy.fmi2 import FMU2Slave
-from fmpy.util import download_test_file
 
 custominput_bp = Blueprint('custominput', __name__)
 CORS(custominput_bp)
@@ -22,15 +21,19 @@ def start_simulation():
         # Create unique session ID
         session_id = str(uuid4())
 
-        # Download and prepare the FMU
-        fmu_filename = 'CoupledClutches.fmu'
-        download_test_file('2.0', 'CoSimulation', 'MapleSim', '2016.2', 'CoupledClutches', fmu_filename)
+        # Load the FMU from disk (must be pre-uploaded alongside this script)
+        fmu_filename = 'CoupledClutches.fmu'  # <-- No more downloading here
+        print(f"[INFO] Starting simulation for session {session_id} using FMU: {fmu_filename}")
+
         model_description = read_model_description(fmu_filename)
         vrs = {var.name: var.valueReference for var in model_description.modelVariables}
 
         unzipdir = extract(fmu_filename)
-        vr_inputs = vrs['inputs']
-        vr_outputs4 = vrs['outputs[4]']
+        vr_inputs = vrs.get('inputs')
+        vr_outputs4 = vrs.get('outputs[4]')
+
+        if vr_inputs is None or vr_outputs4 is None:
+            raise Exception("Could not find required variables ('inputs' or 'outputs[4]') in the FMU.")
 
         # Initialize the FMU
         fmu = FMU2Slave(
@@ -60,6 +63,7 @@ def start_simulation():
         return jsonify({'message': 'Simulation started successfully!', 'session_id': session_id})
 
     except Exception as e:
+        print(f"[ERROR] Error in /start-simulation: {e}")
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
@@ -111,6 +115,7 @@ def step_simulation():
         })
 
     except Exception as e:
+        print(f"[ERROR] Error in /step-simulation for session {session_id}: {e}")
         traceback.print_exc()
         cleanup_session(session_id)
         return jsonify({'error': str(e)}), 500
@@ -125,10 +130,11 @@ def cleanup_session(session_id):
     """Free resources and remove the session."""
     sim = sessions.pop(session_id, None)
     if sim:
+        print(f"[INFO] Cleaning up session {session_id}")
         try:
             sim['fmu'].terminate()
             sim['fmu'].freeInstance()
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"[WARNING] Error cleaning up FMU for session {session_id}: {e}")
         if sim['unzipdir']:
             shutil.rmtree(sim['unzipdir'], ignore_errors=True)
