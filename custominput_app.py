@@ -55,6 +55,7 @@ def start_simulation():
             'time': 0.0,
             'step_size': 1e-3,
             'stop_time': 2.0,
+            'threshold': 2.0,
             'unzipdir': unzipdir,
             'vr_input': vr_input,
             'vr_actual_flow': vr_actual_flow,
