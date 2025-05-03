@@ -22,7 +22,7 @@ def start_simulation():
         session_id = str(uuid4())
 
         # Load the FMU from disk (must be pre-uploaded alongside this script)
-        fmu_filename = 'PumpWithPIDControl.fmu'  # <-- No more downloading here
+        fmu_filename = 'PumpWithPIDControl.fmu'
         print(f"[INFO] Starting simulation for session {session_id} using FMU: {fmu_filename}")
 
         model_description = read_model_description(fmu_filename)
@@ -33,9 +33,8 @@ def start_simulation():
         vr_actual_flow = vrs.get('actualFlow')
         vr_power_consumption = vrs.get('powerConsumption')
 
-
         if vr_input is None or vr_actual_flow is None or vr_power_consumption is None:
-            raise Exception("Could not find required variables ('inputs' or 'outputs[4]') in the FMU.")
+            raise Exception("Could not find required variables ('flowSetpoint', 'actualFlow', or 'powerConsumption') in the FMU.")
 
         # Initialize the FMU
         fmu = FMU2Slave(
@@ -55,14 +54,13 @@ def start_simulation():
             'time': 0.0,
             'step_size': 1e-3,
             'stop_time': 2.0,
-            'threshold': 2.0,
+            'threshold': 2.0,  # Optional: you can remove this if not needed
             'unzipdir': unzipdir,
             'vr_input': vr_input,
             'vr_actual_flow': vr_actual_flow,
             'vr_power_consumption': vr_power_consumption,
             'done': False
         }
-
 
         return jsonify({'message': 'Simulation started successfully!', 'session_id': session_id})
 
@@ -84,7 +82,6 @@ def step_simulation():
     sim = sessions[session_id]
 
     if sim['done']:
-        # Clean up session after it's done
         cleanup_session(session_id)
         return jsonify({'done': True})
 
@@ -97,7 +94,6 @@ def step_simulation():
     vr_actual_flow = sim['vr_actual_flow']
     vr_power_consumption = sim['vr_power_consumption']
 
-
     try:
         # Set input and perform a simulation step
         fmu.setReal([vr_input], [input_value])
@@ -109,7 +105,7 @@ def step_simulation():
         actual_flow, power_consumption = fmu.getReal([vr_actual_flow, vr_power_consumption])
 
         # Check if simulation is done
-        if time >= stop_time or outputs4 > threshold:
+        if time >= stop_time or actual_flow > threshold:
             sim['done'] = True
             cleanup_session(session_id)
 
@@ -120,7 +116,6 @@ def step_simulation():
             'powerConsumption': power_consumption,
             'done': sim['done']
         })
-
 
     except Exception as e:
         print(f"[ERROR] Error in /step-simulation for session {session_id}: {e}")
