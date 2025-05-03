@@ -100,7 +100,7 @@ def step_simulation():
 
     try:
         # Set input and perform a simulation step
-        fmu.setReal([vr_inputs], [input_value])
+        fmu.setReal([vr_input], [input_value])
         fmu.doStep(currentCommunicationPoint=time, communicationStepSize=step_size)
         time += step_size
         sim['time'] = time
