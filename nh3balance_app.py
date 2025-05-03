@@ -1,11 +1,17 @@
-# energy_mass_balance_dash.py (Dash sub-app with one-line grouped layout)
+# nh3balance_app.py
+
+from flask import Blueprint
 import dash
 from dash import html, dcc, Input, Output
 import locale
 
 locale.setlocale(locale.LC_ALL, '')
 
-def init_nh3balance(server):
+# Define the Flask blueprint
+nh3balance_bp = Blueprint('nh3balance', __name__, url_prefix='/nh3balance')
+
+
+def create_dash_app(server):
     app = dash.Dash(
         __name__,
         server=server,
@@ -58,3 +64,12 @@ def init_nh3balance(server):
             round((530 / 2997) * mw, 1),
             round((41316 / 2997) * mw, 1)
         )
+
+    return app
+
+
+# Hook to initialize the Dash app when the blueprint is registered
+@nh3balance_bp.record_once
+def on_load(state):
+    server = state.app
+    create_dash_app(server)
