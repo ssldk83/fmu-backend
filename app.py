@@ -3,7 +3,7 @@ from flask_cors import CORS
 
 ################################### run flas app
 app = Flask(__name__)
-CORS(app)  # Add this to enable CORS globally
+CORS(app)
 
 ################################### import apps
 from custominput_app import custominput_bp
