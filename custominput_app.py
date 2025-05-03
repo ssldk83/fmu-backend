@@ -34,7 +34,7 @@ def start_simulation():
         vr_power_consumption = vrs.get('powerConsumption')
 
 
-        if vr_inputs is None or vr_outputs4 is None:
+        if vr_input is None or vr_actual_flow is None or vr_power_consumption is None:
             raise Exception("Could not find required variables ('inputs' or 'outputs[4]') in the FMU.")
 
         # Initialize the FMU
