@@ -9,7 +9,7 @@ from fmpy import read_model_description, extract
 from fmpy.fmi2 import FMU2Slave
 
 custominput_bp = Blueprint('custominput', __name__)
-CORS(custominput_bp)
+CORS(custominput_bp, resources={r"/*": {"origins": "*"}})
 
 # Store all sessions here: { session_id: simulation_state }
 sessions = {}
