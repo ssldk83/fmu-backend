@@ -1,7 +1,4 @@
-# custominput_app.py
-
 from flask import Blueprint, jsonify, request
-from flask_cors import CORS
 import shutil
 import traceback
 from uuid import uuid4
@@ -12,7 +9,6 @@ custominput_bp = Blueprint('custominput', __name__)
 
 # Store all sessions here: { session_id: simulation_state }
 sessions = {}
-
 
 @custominput_bp.route('/start-simulation', methods=['POST'])
 def start_simulation():
@@ -51,9 +47,9 @@ def start_simulation():
         sessions[session_id] = {
             'fmu': fmu,
             'time': 0.0,
-            'step_size': 1e-3,
-            'stop_time': 2.0,
-            'threshold': 2.0,  # Optional: you can remove this if not needed
+            'step_size': 1.e-1,  # 0.1 seconds
+            'stop_time': 31536000,  # 1 year in seconds
+            'threshold': 200.0,  # Optional: you can remove this if not needed
             'unzipdir': unzipdir,
             'vr_input': vr_input,
             'vr_actual_flow': vr_actual_flow,
