@@ -11,7 +11,7 @@ GENERATED_FOLDER = "app/generated"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(GENERATED_FOLDER, exist_ok=True)
 
-@oandm_bp.route("/upload", methods=["POST"])
+@oandm.route("/upload", methods=["POST"])
 def upload_files():
     folder_id = str(uuid.uuid4())
     folder_path = os.path.join(UPLOAD_FOLDER, folder_id)
