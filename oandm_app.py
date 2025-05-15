@@ -1,8 +1,7 @@
-# oandm_app.py
-
 from flask import Blueprint, request, jsonify
 import openai
 import os
+import traceback
 
 oandm_bp = Blueprint('oandm', __name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -14,17 +13,21 @@ def generate_om_manual():
     details = data.get("details", "")
 
     prompt = f"""Write an Operations & Maintenance manual section for a {equipment_type}.
-Include purpose, normal operating procedure, shutdown, maintenance, and spare parts.
+Include purpose, normal operation, shutdown, maintenance interval, and spare parts list.
 Details: {details}"""
 
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are an expert in technical documentation for process plants."},
+                {"role": "system", "content": "You are an expert in technical documentation for engineers."},
                 {"role": "user", "content": prompt}
             ]
         )
-        return jsonify({"content": response.choices[0].message["content"]})
+        result = response.choices[0].message["content"]
+        return jsonify({"content": result})
+
     except Exception as e:
+        print("🔥 Exception occurred in /generate:")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
