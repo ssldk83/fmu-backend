@@ -23,7 +23,7 @@ Details: {details}"""
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are an expert in technical documentation for engineers."},
                 {"role": "user", "content": prompt}
