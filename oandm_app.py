@@ -6,6 +6,9 @@ from werkzeug.utils import secure_filename
 from openai import OpenAI
 from docx import Document
 
+oandm_bp = Blueprint("oandm", __name__)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 UPLOAD_FOLDER = "app/uploads"
 GENERATED_FOLDER = "app/generated"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
