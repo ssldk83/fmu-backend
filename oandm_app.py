@@ -5,7 +5,6 @@ from openai import OpenAI
 
 oandm_bp = Blueprint('oandm', __name__)
 
-# Create OpenAI client using new SDK (v1.x.x+)
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @oandm_bp.route('/ping', methods=['GET'])
