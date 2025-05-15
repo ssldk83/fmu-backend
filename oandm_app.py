@@ -6,6 +6,10 @@ import traceback
 oandm_bp = Blueprint('oandm', __name__)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+@oandm_bp.route('/ping', methods=['GET'])
+def ping():
+    return jsonify({"message": "O&M backend is alive."})
+
 @oandm_bp.route('/generate', methods=['POST'])
 def generate_om_manual():
     data = request.json
