@@ -11,9 +11,10 @@ def simulate_heatpump():
         # Get inputs from query parameters
         evap_T = float(request.args.get('evap_T', 20))     # °C
         cond_T = float(request.args.get('cond_T', 80))     # °C
-        fluid = request.args.get('fluid', 'R134a')         # default fluid
+        fluid = request.args.get('fluid', 'R134a')
+        Q_cond = float(request.args.get("Q_cond", 1000))   # in kW
 
-        # Create network
+        # Create TESPy network
         my_plant = Network(fluids=[fluid])
         my_plant.set_attr(T_unit='C', p_unit='bar', h_unit='kJ / kg')
 
@@ -32,28 +33,33 @@ def simulate_heatpump():
         c0 = Connection(va, 'out1', cc, 'in1', label='0')
         my_plant.add_conns(c1, c2, c3, c4, c0)
 
-        # Set attributes
-        co.set_attr(pr=0.98, Q=-1e6)
+        # Set component attributes
+        co.set_attr(pr=0.98, Q=-Q_cond * 1e3)  # Convert kW to W, negative because heat is removed
         ev.set_attr(pr=0.98)
         cp.set_attr(eta_s=0.85)
 
+        # Set connection attributes
         c2.set_attr(T=evap_T, x=1, fluid={fluid: 1})
         c4.set_attr(T=cond_T, x=0)
 
-        # Solve
+        # Solve the network
         my_plant.solve(mode='design')
+
+        # Calculate COP and outputs
         cop = abs(co.Q.val) / cp.P.val
 
         return jsonify({
             'status': 'success',
             'COP': round(cop, 3),
-            'cp_power_kW': round(cp.P.val / 1e3, 2),
-            'condenser_Q_kW': round(abs(co.Q.val) / 1e3, 2),
+            'cp_power_kW': round(cp.P.val / 1e3, 2),  # W to kW
+            'condenser_Q_kW': round(abs(co.Q.val) / 1e3, 2),  # W to kW
             'inputs': {
                 'evaporator_T_C': evap_T,
                 'condenser_T_C': cond_T,
-                'fluid': fluid
+                'fluid': fluid,
+                'Q_cond': Q_cond
             }
         })
+
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
