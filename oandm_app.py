@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
-import openai
 import os
 import traceback
+from openai import OpenAI
 
 oandm_bp = Blueprint('oandm', __name__)
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# Create OpenAI client using new SDK (v1.x.x+)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @oandm_bp.route('/ping', methods=['GET'])
 def ping():
@@ -21,17 +23,17 @@ Include purpose, normal operation, shutdown, maintenance interval, and spare par
 Details: {details}"""
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are an expert in technical documentation for engineers."},
                 {"role": "user", "content": prompt}
             ]
         )
-        result = response.choices[0].message["content"]
+        result = response.choices[0].message.content
         return jsonify({"content": result})
 
     except Exception as e:
-        print("🔥 Exception occurred in /generate:")
+        print("🔥 OpenAI error:")
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
