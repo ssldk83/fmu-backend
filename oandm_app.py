@@ -1,51 +1,39 @@
-from flask import Blueprint, request, jsonify
-from openai import OpenAI
-import os
-import traceback
+import uuid
+from flask import send_file
+from werkzeug.utils import secure_filename
+from docx import Document
 
-oandm_bp = Blueprint('oandm', __name__)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+UPLOAD_FOLDER = "app/uploads"
+GENERATED_FOLDER = "app/generated"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(GENERATED_FOLDER, exist_ok=True)
 
-@oandm_bp.route("/ping", methods=["GET"])
-def ping():
-    return jsonify({"message": "O&M backend is alive."})
+@oandm_bp.route("/upload", methods=["POST"])
+def upload_files():
+    folder_id = str(uuid.uuid4())
+    folder_path = os.path.join(UPLOAD_FOLDER, folder_id)
+    os.makedirs(folder_path, exist_ok=True)
 
-@oandm_bp.route("/generate", methods=["POST"])
-def generate_om_manual():
-    try:
-        data = request.json
-        equipment_name = data.get("equipment_name", "Unknown Equipment")
-        filenames = data.get("filenames", [])
+    files = request.files.getlist("files[]")
+    for file in files:
+        filename = secure_filename(file.filename)
+        full_path = os.path.join(folder_path, filename)
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        file.save(full_path)
 
-        prompt = f"""You are an expert in industrial O&M documentation.
+    # Generate .docx
+    doc = Document()
+    doc.add_heading("Operations & Maintenance Manual", 0)
 
-Write a professional Operations & Maintenance manual section for: {equipment_name}
-Assume the following documents exist in the folder: {filenames}
+    for root, dirs, file_list in os.walk(folder_path):
+        if file_list:
+            section = os.path.basename(root)
+            doc.add_page_break()
+            doc.add_heading(f"Equipment: {section}", level=1)
+            doc.add_paragraph("Files included:")
+            for f in file_list:
+                doc.add_paragraph(f"• {f}")
 
-Include:
-- Description / purpose
-- Installation (if applicable)
-- Startup procedure
-- Normal operation
-- Shutdown procedure
-- Maintenance intervals
-- Spare parts
-
-Respond in clear, structured text with headings. Avoid placeholders like "insert here".
-"""
-
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a senior process engineer."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-
-        content = response.choices[0].message.content
-        return jsonify({"content": content})
-
-    except Exception as e:
-        print("🔥 Error in /generate route:")
-        traceback.print_exc()
-        return jsonify({"error": str(e)}), 500
+    output_path = os.path.join(GENERATED_FOLDER, f"{folder_id}.docx")
+    doc.save(output_path)
+    return send_file(output_path, as_attachment=True)
