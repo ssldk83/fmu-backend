@@ -10,9 +10,9 @@ from tespy.tools.characteristics import load_default_char as ldc
 from CoolProp.CoolProp import PropsSI as PSI
 import numpy as np
 
-heatpump_bp = Blueprint('heatpump', __name__)
+heatpumpadv_bp = Blueprint('heatpumpadv', __name__)
 
-@heatpump_bp.route('/parametric-cop', methods=['GET'])
+@heatpumpadv_bp.route('/parametric-cop', methods=['GET'])
 def parametric_cop():
     try:
         fluid = request.args.get("fluid", "R717")
