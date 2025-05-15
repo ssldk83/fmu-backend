@@ -9,11 +9,13 @@ CORS(app)
 from custominput_app import custominput_bp
 from nh3balance_app import nh3balance_bp
 from heatpump_app import heatpump_bp
+from heatpumpadv_app import heatpumpadv_bp
 
 ################################### rout to the apps
 app.register_blueprint(custominput_bp, url_prefix='/custominput')
 app.register_blueprint(nh3balance_bp, url_prefix='/nh3balance')
 app.register_blueprint(heatpump_bp, url_prefix='/heatpump')
+app.register_blueprint(heatpumpadv_bp, url_prefix='/heatpumpadv')
 
 #################################### Port
 if __name__ == "__main__":
