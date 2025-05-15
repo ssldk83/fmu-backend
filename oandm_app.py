@@ -1,6 +1,9 @@
+import os
 import uuid
-from flask import send_file
+import traceback
+from flask import Blueprint, request, jsonify, send_file
 from werkzeug.utils import secure_filename
+from openai import OpenAI
 from docx import Document
 
 UPLOAD_FOLDER = "app/uploads"
