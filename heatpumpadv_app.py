@@ -15,11 +15,9 @@ heatpumpadv_bp = Blueprint('heatpumpadv', __name__)
 @heatpumpadv_bp.route('/parametric-cop', methods=['GET'])
 def parametric_cop():
     try:
-        fluid = request.args.get("fluid", "R717")
+        working_fluid = request.args.get("fluid", "R717")
         evap_T = float(request.args.get("evap_T", 5))
         cond_T = float(request.args.get("cond_T", 60))
-
-        working_fluid = fluid
 
         nw = Network(T_unit="C", p_unit="bar", h_unit="kJ / kg", m_unit="kg / s")
         nw.set_attr(iterinfo=False)
