@@ -90,9 +90,8 @@ def parametric_cop():
                 "message": "Missing variables before solving.",
                 "details": check
             })
-            
-        nw.solve("design")
 
+        
         #*********************** Set Final System Parameters
         c0.set_attr(p=None)
         cd.set_attr(ttd_u=5)
