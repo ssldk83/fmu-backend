@@ -70,7 +70,8 @@ def parametric_cop():
         cp1.set_attr(pr=3.0)
         ic.set_attr(pr1=0.99, pr2=0.98)
         hsp.set_attr(eta_s=0.75)
-        
+        cv.set_attr(pr=0.98)
+
         p_cond = PSI("P", "Q", 1, "T", 273.15 + 95, working_fluid) / 1e5 # bar
         c0.set_attr(T=170, p=p_cond, fluid={working_fluid: 1})        
         c4.set_attr(x=0.9, T=5)
