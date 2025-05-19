@@ -83,13 +83,14 @@ def parametric_cop():
         c22.set_attr(T=90)
 
         #*********************** Solve
-        missing = nw.check_network()
-        if missing["missing_variables"]:
+        check = nw.check_network()
+        if check is not None and "missing_variables" in check and check["missing_variables"]:
             return jsonify({
                 "status": "error",
-                "message": "Missing parameters!",
-                "details": missing
+                "message": "Missing variables before solving.",
+                "details": check
             })
+            
         nw.solve("design")
 
         #*********************** Set Final System Parameters
