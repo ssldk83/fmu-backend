@@ -83,7 +83,13 @@ def parametric_cop():
         c22.set_attr(T=90)
 
         #*********************** Solve
-        print("DoF before solve:", nw.lin_dep)  # Shows how many degrees of freedom are missing
+        missing = nw.check_network()
+        if missing["missing_variables"]:
+            return jsonify({
+                "status": "error",
+                "message": "Missing parameters!",
+                "details": missing
+            })
         nw.solve("design")
 
         #*********************** Set Final System Parameters
