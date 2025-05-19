@@ -4,3 +4,4 @@ fmpy
 openai
 gunicorn
 tespy
+CoolProp
