@@ -71,9 +71,14 @@ def parametric_cop():
         ic.set_attr(pr1=0.99, pr2=0.98)
         hsp.set_attr(eta_s=0.75)
         cv.set_attr(pr=0.98)
+        cd.set_attr(ttd_u=5)
+        ev.set_attr(ttd_l=5)
+        su.set_attr(ttd_u=5)
+        cp1.set_attr(eta_s=0.8)
+        cp2.set_attr(eta_s=0.8)
 
         p_cond = PSI("P", "Q", 1, "T", 273.15 + 95, working_fluid) / 1e5 # bar
-        c0.set_attr(p=p_cond, fluid={working_fluid: 1})        
+        c0.set_attr(fluid={working_fluid: 1})        
         c4.set_attr(x=0.9)
         c11.set_attr(p=1.013, T=15, fluid={"water": 1})
         c14.set_attr(T=30)
@@ -81,7 +86,8 @@ def parametric_cop():
         c19.set_attr(T=9, p=1.013)
         c20.set_attr(T=60, p=2, fluid={"water": 1})
         c22.set_attr(T=90)
-
+        c8.set_attr(Td_bp=4)
+        
         #*********************** Solve
         check = nw.check_network()
         if check is not None and "missing_variables" in check and check["missing_variables"]:
@@ -91,19 +97,6 @@ def parametric_cop():
                 "details": check
             })
 
-        
-        #*********************** Set Final System Parameters
-        c0.set_attr(p=None)
-        cd.set_attr(ttd_u=5)
-        c4.set_attr(T=None)
-        ev.set_attr(ttd_l=5)
-        c6.set_attr(h=None)
-        su.set_attr(ttd_u=5)
-        c7.set_attr(h=None)
-        cp1.set_attr(eta_s=0.8)
-        c9.set_attr(h=None)
-        cp2.set_attr(eta_s=0.8)
-        c8.set_attr(h=None, Td_bp=4)
         nw.solve("design")
 
         # Extract results (e.g., COP)
