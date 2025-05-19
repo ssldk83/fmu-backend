@@ -70,7 +70,6 @@ def parametric_cop():
         cp1.set_attr(pr=3.0)
         ic.set_attr(pr1=0.99, pr2=0.98)
         hsp.set_attr(eta_s=0.75)
-        cv.set_attr(pr=0.98)
         cd.set_attr(ttd_u=5)
         ev.set_attr(ttd_l=5)
         su.set_attr(ttd_u=5)
