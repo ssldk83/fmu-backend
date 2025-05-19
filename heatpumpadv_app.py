@@ -62,26 +62,21 @@ def parametric_cop():
         nw.add_conns(c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23)
 
         # Parametrization
-        cd.set_attr(pr1=0.99, pr2=0.99)
         rp.set_attr(eta_s=0.75)
-        ev.set_attr(pr1=0.99)
-        su.set_attr(pr1=0.99, pr2=0.99)
+        ev.set_attr(pr1=0.99, ttd_l=5)
+        cd.set_attr(pr1=0.99, pr2=0.99, ttd_u=5)
+        su.set_attr(pr1=0.99, pr2=0.99, ttd_u=5)
         cons.set_attr(pr=0.99, Q=-230e3)
-        cp1.set_attr(pr=3.0)
         ic.set_attr(pr1=0.99, pr2=0.98)
         hsp.set_attr(eta_s=0.75)
-        cd.set_attr(ttd_u=5)
-        ev.set_attr(ttd_l=5)
-        su.set_attr(ttd_u=5)
-        cp1.set_attr(eta_s=0.8)
+        cp1.set_attr(eta_s=0.8, pr=3.0)
         cp2.set_attr(eta_s=0.8)
-
-        p_cond = PSI("P", "Q", 1, "T", 273.15 + 95, working_fluid) / 1e5 # bar
+        
         c0.set_attr(fluid={working_fluid: 1})        
         c4.set_attr(x=0.9)
         c11.set_attr(p=1.013, T=15, fluid={"water": 1})
         c14.set_attr(T=30)
-        c17.set_attr(T=15, fluid={"water": 1})
+        c17.set_attr(fluid={"water": 1})
         c19.set_attr(T=9, p=1.013)
         c20.set_attr(T=60, p=2, fluid={"water": 1})
         c22.set_attr(T=90)
