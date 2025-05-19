@@ -67,8 +67,7 @@ def parametric_cop():
         ev.set_attr(pr1=0.99)
         su.set_attr(pr1=0.99, pr2=0.99)
         cons.set_attr(pr=0.99, Q=-230e3)
-        pr = (c1.p.val / c5.p.val) ** 0.5 # may face issue here.
-        cp1.set_attr(pr=pr) # may face issue here.
+        cp1.set_attr(pr=3.0)
         ic.set_attr(pr1=0.99, pr2=0.98)
         hsp.set_attr(eta_s=0.75)
         
@@ -84,6 +83,7 @@ def parametric_cop():
         c22.set_attr(T=90)
 
         #*********************** Solve
+        print("DoF before solve:", nw.lin_dep)  # Shows how many degrees of freedom are missing
         nw.solve("design")
 
         #*********************** Set Final System Parameters
