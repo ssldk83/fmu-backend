@@ -158,13 +158,55 @@ def parametric_cop():
         c8.set_attr(h=None, Td_bp=4)
         nw.solve("design")
         #nw.save("system_design.json")
+
+        cp1.set_attr(design=["eta_s"], offdesign=["eta_s_char"])
+        cp2.set_attr(design=["eta_s"], offdesign=["eta_s_char"])
+        rp.set_attr(design=["eta_s"], offdesign=["eta_s_char"])
+        hsp.set_attr(design=["eta_s"], offdesign=["eta_s_char"])
         
+        cons.set_attr(design=["pr"], offdesign=["zeta"])
+        
+        cd.set_attr(
+            design=["pr2", "ttd_u"], offdesign=["zeta2", "kA_char"]
+        )
+        
+        from tespy.tools.characteristics import CharLine
+        from tespy.tools.characteristics import load_default_char as ldc
+        
+        kA_char1 = ldc("heat exchanger", "kA_char1", "DEFAULT", CharLine)
+        kA_char2 = ldc("heat exchanger", "kA_char2", "EVAPORATING FLUID", CharLine)
+        ev.set_attr(
+            kA_char1=kA_char1, kA_char2=kA_char2,
+            design=["pr1", "ttd_l"], offdesign=["zeta1", "kA_char"]
+        )
+        
+        su.set_attr(
+            design=["pr1", "pr2", "ttd_u"], offdesign=["zeta1", "zeta2", "kA_char"]
+        )
+        
+        ic.set_attr(
+            design=["pr1", "pr2"], offdesign=["zeta1", "zeta2", "kA_char"]
+        )
+        c14.set_attr(design=["T"])
+        nw.solve("offdesign")
+
         # Extract results (e.g., COP)
         q_out = cons.Q.val  # Heat output from consumer [W]
         w_in = cp1.P.val + cp2.P.val + rp.P.val + hsp.P.val  # Total power input [W]
         cop = abs(q_out) / w_in if w_in != 0 else None
+        import numpy as np
+        nw.set_attr(iterinfo=False)
+        
+        for Q in np.linspace(1, 0.6, 5) * cons.Q.val:
+            cons.set_attr(Q=Q)
+            nw.solve("offdesign", design_path="system_design.json")
+            print(
+                "COP:",
+                abs(cons.Q.val) / (cp1.P.val + cp2.P.val + hsp.P.val + rp.P.val)
+            )
 
 
+        
         return jsonify({
             "status": "success",
             "COP": round(cop, 3),
