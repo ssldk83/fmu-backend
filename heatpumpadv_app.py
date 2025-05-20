@@ -247,7 +247,7 @@ def parametric_cop():
                 "p_bar": round(conn.p.val, 3) if conn.p.val is not None else None,
                 "T_C": round(conn.T.val, 3) if conn.T.val is not None else None,
                 "h_kJ_per_kg": round(conn.h.val, 3) if conn.h.val is not None else None,
-                "fluid": {k: round(v, 3) for k, v in conn.fluid.val.items()} if conn.fluid.val else None
+                "fluid": {k: round(v, 3) for k, v in conn.fluid.val.items} if conn.fluid.val else None
             }
         connection_data.append(data)
             
