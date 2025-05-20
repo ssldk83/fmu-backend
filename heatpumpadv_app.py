@@ -233,6 +233,11 @@ def parametric_cop():
         #        abs(cons.Q.val) / (cp1.P.val + cp2.P.val + hsp.P.val + rp.P.val)
         #    )
 
+        
+        # Compute final COP
+        q_out = cons.Q.val
+        w_in = cp1.P.val + cp2.P.val + rp.P.val + hsp.P.val
+        cop = abs(q_out) / w_in if w_in != 0 else None
 
         os.remove(design_path)
 
