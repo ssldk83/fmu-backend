@@ -225,13 +225,13 @@ def parametric_cop():
         import numpy as np
         nw.set_attr(iterinfo=False)
         
-        for Q in np.linspace(1, 0.6, 5) * cons.Q.val:
-            cons.set_attr(Q=Q)
-            nw.solve("offdesign", design_path)
-            print(
-                "COP:",
-                abs(cons.Q.val) / (cp1.P.val + cp2.P.val + hsp.P.val + rp.P.val)
-            )
+        #for Q in np.linspace(1, 0.6, 5) * cons.Q.val:
+        #    cons.set_attr(Q=Q)
+        #    nw.solve("offdesign", design_path)
+        #    print(
+        #        "COP:",
+        #        abs(cons.Q.val) / (cp1.P.val + cp2.P.val + hsp.P.val + rp.P.val)
+        #    )
 
 
         os.remove(design_path)
