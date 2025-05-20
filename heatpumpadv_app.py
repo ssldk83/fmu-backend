@@ -239,6 +239,18 @@ def parametric_cop():
         w_in = cp1.P.val + cp2.P.val + rp.P.val + hsp.P.val
         cop = abs(q_out) / w_in if w_in != 0 else None
 
+        connection_data = []
+        for conn in nw.conns.values():
+            data = {
+                "label": conn.label,
+                "m_dot_kg_s": round(conn.m.val, 3) if conn.m.val is not None else None,
+                "p_bar": round(conn.p.val, 3) if conn.p.val is not None else None,
+                "T_C": round(conn.T.val, 3) if conn.T.val is not None else None,
+                "h_kJ_per_kg": round(conn.h.val, 3) if conn.h.val is not None else None,
+                "fluid": {k: round(v, 3) for k, v in conn.fluid.val.items()} if conn.fluid.val else None
+            }
+        connection_data.append(data)
+            
         os.remove(design_path)
 
         return jsonify({
@@ -246,6 +258,7 @@ def parametric_cop():
             "COP": round(cop, 3),
             "Q_output_kW": round(q_out / 1e3, 2),
             "Power_input_kW": round(w_in / 1e3, 2),
+            "connections": connection_data
         })
 
 
