@@ -92,7 +92,8 @@ def parametric_cop():
         c17.set_attr(T=15, fluid={"water": 1})
         c19.set_attr(T=9, p=1.013)
         nw.solve("design")
-        nw.print_results()
+        #nw.print_results()
+        
         from tespy.components import Compressor, Splitter, Merge
 
         cp1 = Compressor("compressor 1")
