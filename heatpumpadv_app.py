@@ -222,8 +222,8 @@ def parametric_cop():
         nw.solve("offdesign", design_path=design_path)
         
         
-        import numpy as np
-        nw.set_attr(iterinfo=False)
+        #import numpy as np
+        #nw.set_attr(iterinfo=False)
         
         #for Q in np.linspace(1, 0.6, 5) * cons.Q.val:
         #    cons.set_attr(Q=Q)
