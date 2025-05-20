@@ -240,16 +240,27 @@ def parametric_cop():
         cop = abs(q_out) / w_in if w_in != 0 else None
 
         connection_data = []
+        
         for conn in nw.conns.values():
+            try:
+                fluids = conn.fluid.val
+                if isinstance(fluids, dict):
+                    fluid_info = {k: round(v, 3) for k, v in fluids.items()}
+                else:
+                    fluid_info = str(fluids)  # fallback if it's not a dict
+            except:
+                fluid_info = None
+        
             data = {
                 "label": conn.label,
-                "m_dot_kg_s": round(conn.m.val, 3) if conn.m.val is not None else None,
-                "p_bar": round(conn.p.val, 3) if conn.p.val is not None else None,
-                "T_C": round(conn.T.val, 3) if conn.T.val is not None else None,
-                "h_kJ_per_kg": round(conn.h.val, 3) if conn.h.val is not None else None,
-                "fluid": {k: round(v, 3) for k, v in conn.fluid.val.items} if conn.fluid.val else None
+                "m_dot_kg_s": round(conn.m.val, 3) if hasattr(conn.m, "val") and conn.m.val is not None else None,
+                "p_bar": round(conn.p.val, 3) if hasattr(conn.p, "val") and conn.p.val is not None else None,
+                "T_C": round(conn.T.val, 3) if hasattr(conn.T, "val") and conn.T.val is not None else None,
+                "h_kJ_per_kg": round(conn.h.val, 3) if hasattr(conn.h, "val") and conn.h.val is not None else None,
+                "fluid": fluid_info
             }
-        connection_data.append(data)
+            connection_data.append(data)
+
             
         os.remove(design_path)
 
