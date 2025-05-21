@@ -11,7 +11,10 @@ def json_with_nan_fix(data):
             return None
         return o
 
-    return Response(json.dumps(data, default=default), mimetype='application/json')
+    return Response(
+        json.dumps(data, default=default),
+        content_type="application/json"
+    )
 
 
 heatpumpadv_bp = Blueprint('heatpumpadv', __name__)
