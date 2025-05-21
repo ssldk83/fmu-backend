@@ -224,16 +224,6 @@ def parametric_cop():
         # Offdesign
         nw.solve("offdesign", design_path=design_path)
         
-        
-        #nw.set_attr(iterinfo=False)
-        
-        #for Q in np.linspace(1, 0.6, 5) * cons.Q.val:
-        #    cons.set_attr(Q=Q)
-        #    nw.solve("offdesign", design_path)
-        #    print(
-        #        "COP:",
-        #        abs(cons.Q.val) / (cp1.P.val + cp2.P.val + hsp.P.val + rp.P.val)
-        #    )
 
         
         # Compute final COP
@@ -243,34 +233,21 @@ def parametric_cop():
 
         connection_data = []
 
-        # Iterate over actual list of connections
-        for conn in nw.conns.conn_list:
-            fluid_info = None
-        
-            # Safely extract fluid info
-            try:
-                if conn.fluid and isinstance(conn.fluid.val, dict):
-                    fluid_info = {k: round(v, 3) for k, v in conn.fluid.val.items()}
-            except Exception as e:
-                print(f"Error reading fluid info from {conn.label}: {e}")
-                fluid_info = None
-        
+        for conn in nw.conns.values():
+            # Handle fluid data robustly
+                fluid_info = {k: round(v, 3) for k, v in conn.fluid.val.items()}
             # Build connection result
-            try:
-                data = {
-                    "label": conn.label,
-                    "m_dot_kg_s": round(conn.m.val, 3) if hasattr(conn.m, "val") and conn.m.val is not None else None,
-                    "p_bar": round(conn.p.val, 3) if hasattr(conn.p, "val") and conn.p.val is not None else None,
-                    "T_C": round(conn.T.val, 3) if hasattr(conn.T, "val") and conn.T.val is not None else None,
-                    "h_kJ_per_kg": round(conn.h.val, 3) if hasattr(conn.h, "val") and conn.h.val is not None else None,
-                    "fluid": fluid_info
-                }
-                connection_data.append(data)
-            except Exception as e:
-                print(f"Error building connection data for {conn.label}: {e}")
+            data = {
+                "label": conn.label,
+                "m_dot_kg_s": round(conn.m.val, 3) if hasattr(conn.m, "val") and conn.m.val is not None else None,
+                "p_bar": round(conn.p.val, 3) if hasattr(conn.p, "val") and conn.p.val is not None else None,
+                "T_C": round(conn.T.val, 3) if hasattr(conn.T, "val") and conn.T.val is not None else None,
+                "h_kJ_per_kg": round(conn.h.val, 3) if hasattr(conn.h, "val") and conn.h.val is not None else None,
+                "fluid": fluid_info
+            }
+            connection_data.append(data)
 
 
-            
         os.remove(design_path)
 
         return jsonify({
