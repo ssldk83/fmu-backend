@@ -249,8 +249,9 @@ def parametric_cop():
             results[key] = df.to_dict(orient="index")
 
 
-        return json_with_nan_fix(results["Connection"])
-
+        return json_with_nan_fix({
+            "results": results
+        })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
