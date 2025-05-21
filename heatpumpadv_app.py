@@ -261,8 +261,8 @@ def parametric_cop():
             results[key] = df.to_dict(orient="index")
 
 
-        return json_with_nan_fix({
-            "results": nw.results
+        return json_with_nan_fix({ 
+            "results": {k: v.to_dict() for k, v in nw.results.items()} 
         })
 
     except Exception as e:
