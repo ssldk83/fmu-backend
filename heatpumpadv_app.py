@@ -231,6 +231,12 @@ def parametric_cop():
 
         os.remove(design_path)
 
+        results = {}
+
+        for key, df in nw.results.items():
+            results[key] = df.to_dict(orient="index")
+
+
         return jsonify({
             "status": "success",
             "COP (-)": round(cop, 3),
@@ -245,9 +251,7 @@ def parametric_cop():
             "Temperature to compressor 2 (°C)": round(c8.T.val,2),
             "Pressure from compressor 2 (bar)": round(c9.p.val,2),
             "Temperature from compressor 2 (°C)": round(c9.T.val,2),
-            "results": {
-                "connections": nw.results["Connection"].to_dict(orient="index"),
-                "components": nw.results["Component"].to_dict(orient="index")}
+            "results": results
         })
 
     except Exception as e:
