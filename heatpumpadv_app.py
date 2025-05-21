@@ -235,7 +235,14 @@ def parametric_cop():
 
         for conn in nw.conns.values():
             # Handle fluid data robustly
-                fluid_info = {k: round(v, 3) for k, v in conn.fluid.val.items()}
+            try:
+                if hasattr(conn.fluid, "val") and isinstance(conn.fluid.val, dict):
+                    fluid_info = {k: round(v, 3) for k, v in conn.fluid.val.items()}
+                else:
+                    fluid_info = None
+            except:
+                fluid_info = None
+        
             # Build connection result
             data = {
                 "label": conn.label,
@@ -246,6 +253,7 @@ def parametric_cop():
                 "fluid": fluid_info
             }
             connection_data.append(data)
+
 
 
         os.remove(design_path)
