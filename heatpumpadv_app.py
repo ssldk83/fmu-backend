@@ -245,6 +245,9 @@ def parametric_cop():
             "Temperature to compressor 2 (°C)": round(c8.T.val,2),
             "Pressure from compressor 2 (bar)": round(c9.p.val,2),
             "Temperature from compressor 2 (°C)": round(c9.T.val,2),
+            "results": {
+                "connections": nw.results["Connection"].to_dict(orient="index"),
+                "components": nw.results["Component"].to_dict(orient="index")}
         })
 
     except Exception as e:
