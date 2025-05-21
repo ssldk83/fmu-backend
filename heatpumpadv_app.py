@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+import numpy as np
 import os, uuid
 
 heatpumpadv_bp = Blueprint('heatpumpadv', __name__)
@@ -186,8 +187,6 @@ def parametric_cop():
         
         c8.set_attr(h=None, Td_bp=4)
         nw.solve("design")
-        design_path = f"/tmp/design_{uuid.uuid4().hex}.json"
-        nw.save(design_path)
 
         cp1.set_attr(design=["eta_s"], offdesign=["eta_s_char"])
         cp2.set_attr(design=["eta_s"], offdesign=["eta_s_char"])
@@ -218,20 +217,23 @@ def parametric_cop():
             design=["pr1", "pr2"], offdesign=["zeta1", "zeta2", "kA_char"]
         )
         c14.set_attr(design=["T"])
-        
+
+        # Design point
+        design_path = f"/tmp/design_{uuid.uuid4().hex}.json"
+        nw.save(design_path)
+        # Offdesign
         nw.solve("offdesign", design_path=design_path)
         
         
-        import numpy as np
-        nw.set_attr(iterinfo=False)
+        #nw.set_attr(iterinfo=False)
         
-        for Q in np.linspace(1, 0.6, 5) * cons.Q.val:
-            cons.set_attr(Q=Q)
-            nw.solve("offdesign", design_path)
-            print(
-                "COP:",
-                abs(cons.Q.val) / (cp1.P.val + cp2.P.val + hsp.P.val + rp.P.val)
-            )
+        #for Q in np.linspace(1, 0.6, 5) * cons.Q.val:
+        #    cons.set_attr(Q=Q)
+        #    nw.solve("offdesign", design_path)
+        #    print(
+        #        "COP:",
+        #        abs(cons.Q.val) / (cp1.P.val + cp2.P.val + hsp.P.val + rp.P.val)
+        #    )
 
         
         # Compute final COP
