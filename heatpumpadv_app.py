@@ -1,20 +1,29 @@
 from flask import Blueprint, request, jsonify
 import os, uuid
 
-import json
-import numpy as np
 from flask import Response
+import numpy as np
+import json
 
 def json_with_nan_fix(data):
-    def default(o):
-        if isinstance(o, float) and (np.isnan(o) or np.isinf(o)):
-            return None
-        return o
+    def fix_nans(obj):
+        if isinstance(obj, dict):
+            return {k: fix_nans(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [fix_nans(v) for v in obj]
+        elif isinstance(obj, float):
+            if np.isnan(obj) or np.isinf(obj):
+                return None
+            else:
+                return obj
+        return obj
 
+    clean_data = fix_nans(data)
     return Response(
-        json.dumps(data, default=default),
+        json.dumps(clean_data),
         content_type="application/json"
     )
+
 
 
 heatpumpadv_bp = Blueprint('heatpumpadv', __name__)
@@ -253,8 +262,9 @@ def parametric_cop():
 
 
         return json_with_nan_fix({
-            "results": results
+            "results": nw.results
         })
+
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
