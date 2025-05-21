@@ -233,10 +233,12 @@ def parametric_cop():
 
         return jsonify({
             "status": "success",
-            "COP": round(cop, 3),
-            "Q_output_kW": round(q_out / 1e3, 2),
-            "Power_input_kW": round(w_in / 1e3, 2),
-            " Compressor mass flow ": cp1.m.val,
+            "COP (-)": round(cop, 3),
+            "Q_output (kW)": round(q_out / 1e3, 2),
+            "Power_input (kW)": round(w_in / 1e3, 2),
+            "Mass flow to compressor 1 (kg/s)": c6.m.val,
+            "Pressure to compressor 1 (bar)": c6.p.val,
+            "Temperature to compressor 1 (bar)": c6.T.val,
         })
 
     except Exception as e:
