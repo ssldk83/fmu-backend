@@ -249,9 +249,13 @@ def parametric_cop():
             results[key] = df.to_dict(orient="index")
 
 
-        return json_with_nan_fix({
-            "results": results
-        })
+        return json_with_nan_fix(results["Connection"])
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+
+@heatpumpadv_bp.route("/test-json", methods=["GET"])
+def test_json():
+    from flask import Response
+    return Response('{"status":"ok"}', mimetype="application/json")
