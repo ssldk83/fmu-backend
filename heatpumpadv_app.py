@@ -1,6 +1,18 @@
 from flask import Blueprint, request, jsonify
-import numpy as np
 import os, uuid
+
+import json
+import numpy as np
+from flask import Response
+
+def json_with_nan_fix(data):
+    def default(o):
+        if isinstance(o, float) and (np.isnan(o) or np.isinf(o)):
+            return None
+        return o
+
+    return Response(json.dumps(data, default=default), mimetype='application/json')
+
 
 heatpumpadv_bp = Blueprint('heatpumpadv', __name__)
 @heatpumpadv_bp.route('/parametric-cop', methods=['GET'])
@@ -237,7 +249,7 @@ def parametric_cop():
             results[key] = df.to_dict(orient="index")
 
 
-        return jsonify({
+        return json_with_nan_fix({
             "results": results
         })
 
