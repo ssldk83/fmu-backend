@@ -6,3 +6,4 @@ gunicorn
 tespy
 CoolProp
 pyH2A
+h2integrate
