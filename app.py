@@ -10,7 +10,7 @@ from custominput_app import custominput_bp
 from nh3balance_app import nh3balance_bp
 from heatpump_app import heatpump_bp
 from heatpumpadv_app import heatpumpadv_bp
-from lcoh_calc_app import lcoh_bp
+from lcoh_app import lcoh_bp
 
 ################################### rout to the apps
 app.register_blueprint(custominput_bp, url_prefix='/custominput')
