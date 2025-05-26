@@ -1,8 +1,8 @@
-git+https://github.com/NREL/pyH2A.git@main#egg=pyH2Aflask
+flask
 flask-cors
 fmpy
 openai
 gunicorn
 tespy
 CoolProp
-git+https://github.com/NREL/pyH2A.git@main#egg=pyH2A
+NREL-PySAM
