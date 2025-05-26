@@ -5,4 +5,4 @@ openai
 gunicorn
 tespy
 CoolProp
-pyH2A
+pyH2A @ git+https://github.com/NREL/pyH2A.git
