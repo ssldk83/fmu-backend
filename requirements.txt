@@ -7,3 +7,6 @@ tespy
 CoolProp
 pyH2A
 h2integrate
+fastapi
+uvicorn
+pydantic
